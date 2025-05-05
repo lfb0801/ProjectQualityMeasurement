@@ -1,11 +1,15 @@
 ## Implementation
 
-Welcome to the architecture documentation for **My System**.  
-Here you’ll find:
+### Lines of Code
 
-- The system’s context and scope
-- High-level C4 diagrams
-- Key components and technology choices
-- ADR log detailing major decisions
+I am able to make detailed scans over the content of source files.
+Thanks to the [LOCC4J](https://github.com/cthing/locc4j) library.
+This allows me to ignore blank and comments in my analysis.
 
-> _Tip: Use the left-hand navigation to jump between sections._
+### JGit
+
+Thanks to [JGit](https://github.com/eclipse-jgit/jgit) I am able to interact with the VCS of the given project and
+filter/focus on specific parts.
+
+It also allows me to increase the interval of analysis.
+This is important as running my analysis on every build/commit would be expensive and wouldn't align with my research.

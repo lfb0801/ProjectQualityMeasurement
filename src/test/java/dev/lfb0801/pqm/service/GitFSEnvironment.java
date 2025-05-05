@@ -5,29 +5,35 @@ import dev.lfb0801.pqm.util.Unchecked.ThrowingConsumer;
 import org.assertj.core.util.Files;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import static dev.lfb0801.pqm.util.Unchecked.uncheck;
 
 public abstract class GitFSEnvironment {
 
+    public static final String MASTER = "refs/heads/master";
+    public static final String ORIGIN_MASTER = "refs/remotes/origin/master";
+    public static Git remote;
+    public static Git local;
 
-    public static final Git remote = initRepository();
-    public static final Git local = cloneRepository();
     private static final ThrowingConsumer<String> commitState = (String s) -> {
         local.add()
-             .addFilepattern(".")
+             .setAll(true)
              .call();
 
         local.commit()
              .setMessage(s)
              .call();
     };
-    public static final String MASTER = "refs/heads/master";
-    public static final String ORIGIN_MASTER = "refs/remotes/origin/master";
 
     private static Git initRepository() {
         try {
@@ -55,27 +61,44 @@ public abstract class GitFSEnvironment {
         }
     }
 
-    public static void doAndCommit(String message, Runnable runnable) {
-        runnable.run();
-        uncheck(commitState).accept(message);
+    public static void writeToFile(String file, String content) throws IOException {
+        new FileOutputStream(file).write(content.getBytes());
     }
 
-    public static Unchecked.ThrowingBiConsumer<String, String> writeToFile() {
-        return (String file, String content) -> new FileOutputStream(file).write(content.getBytes());
+    public static void appendToFile(String file, String content) throws IOException {
+        var old = new String(new FileInputStream(file).readAllBytes());
+        new FileOutputStream(file).write(old.concat("\n")
+                                            .concat(content)
+                                            .getBytes());
     }
 
-    public void tearDown() {
+    @BeforeEach
+    void setup() {
+        remote = initRepository();
+        local = cloneRepository();
+    }
+
+    @AfterEach
+    void tearDown() {
         remote.close();
         local.close();
     }
 
-    public File createFile(String name) {
+    public void performCommits(List<Unchecked.ThrowingRunnable> commits) {
+        IntStream.range(0, commits.size())
+                 .mapToObj(i -> Map.entry("commit: %s".formatted(i), commits.get(i)))
+                 .forEach(e -> {
+                     uncheck(e.getValue()).run();
+                     uncheck(commitState).accept(e.getKey());
+                 });
+    }
+
+    public File createFile(String name) throws IOException {
         File file = new File(local.getRepository()
-                                  .getWorkTree(), name);
+                                  .getWorkTree()
+                                  .getCanonicalPath(), name);
         try {
-            if (!file.createNewFile()) {
-                throw new IllegalStateException();
-            }
+            file.createNewFile();
         } catch (IOException e) {
             throw new IllegalStateException();
         }

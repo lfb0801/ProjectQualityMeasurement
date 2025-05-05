@@ -11,12 +11,12 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.StreamSupport;
+
+import static dev.lfb0801.pqm.util.Unchecked.uncheck;
 
 @Service
 public class GitCounter {
@@ -27,36 +27,37 @@ public class GitCounter {
         this.git = git;
     }
 
-    public Set<String> getEveryCommittedFile() throws IOException {
+    public Set<String> getFilesInRepository() throws IOException {
         Repository repo = git.getRepository();
 
         ObjectId headId = repo.resolve(Constants.HEAD);
-        Set<String> committed = new HashSet<>();
-        try (RevWalk revWalk = new RevWalk(repo)) {
+        try (RevWalk revWalk = new RevWalk(git.getRepository())) {
             RevCommit commit = revWalk.parseCommit(headId);
-            ObjectId treeId = commit.getTree()
-                                    .getId();
-            try (TreeWalk tw = new TreeWalk(repo)) {
-                tw.addTree(treeId);
-                tw.setRecursive(true);
-                while (tw.next()) {
-                    committed.add(tw.getPathString());
-                }
-            }
+            return getFilesInCommit(commit.getTree()
+                                          .getId());
         }
-        return committed;
     }
 
-    public Map<Path, Integer> countCommits(Path path) {
-        try {
-            List<RevCommit> list = StreamSupport.stream(git.log()
-                                                           .addPath(path.toString())
-                                                           .call()
-                                                           .spliterator(), false)
-                                                .toList();
-        } catch (GitAPIException e) {
-            throw new RuntimeException(e);
+    public Map.Entry<String, Long> countCommits(String file) throws GitAPIException, IOException {
+        return Map.entry(file, StreamSupport.stream(git.log()
+                                                       .all()
+                                                       .call()
+                                                       .spliterator(), true)
+                                            .map(uncheck((RevCommit c) -> getFilesInCommit(c.getTree()
+                                                                                            .getId())))
+                                            .filter(s -> s.contains(file))
+                                            .count());
+    }
+
+    private Set<String> getFilesInCommit(ObjectId id) throws IOException {
+        Set<String> committed = new HashSet<>();
+        try (TreeWalk tw = new TreeWalk(git.getRepository())) {
+            tw.addTree(id);
+            tw.setRecursive(true);
+            while (tw.next()) {
+                committed.add(tw.getPathString());
+            }
+            return committed;
         }
-        return Map.of();
     }
 }

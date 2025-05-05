@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  structurizr:
+    image: structurizr/lite
+    volumes:
+      - ./structurizr:/usr/local/structurizr  # Adjusted path with drive letter
+    ports:
+      - "9797:8080"
+  plantuml-server:
+    image: plantuml/plantuml-server:tomcat
+    ports:
+      - "9898:8080"

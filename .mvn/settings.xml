@@ -1,0 +1,19 @@
+<settings>
+    <pluginGroups>
+        <pluginGroup>org.sonarsource.scanner.maven</pluginGroup>
+    </pluginGroups>
+    <profiles>
+        <profile>
+            <id>sonar</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <sonar.projectKey>Project-Quality-Measurement</sonar.projectKey>
+                <sonar.projectName>Project Quality Measurement</sonar.projectName>
+                <sonar.host.url>http://localhost:9000</sonar.host.url>
+                <sonar.token>OVERRIDE ME</sonar.token>
+            </properties>
+        </profile>
+    </profiles>
+</settings>

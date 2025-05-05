@@ -1,50 +1,97 @@
-version: '3.8'
-services:
+version: "3.8"
 
+services:
   structurizr:
     image: structurizr/lite
     volumes:
-      - ./structurizr:/usr/local/structurizr  # Adjusted path with drive letter
+      - ./structurizr:/usr/local/structurizr
     ports:
       - "9797:8080"
+    networks:
+      - ${NETWORK_TYPE:-ipv4}
 
   plantuml-server:
     image: plantuml/plantuml-server:tomcat
     ports:
       - "9898:8080"
+    networks:
+      - ${NETWORK_TYPE:-ipv4}
 
-  sonarqube:
-    image: sonarqube:lts-community
-    depends_on:
-      - sonar_db
-    environment:
-      SONAR_JDBC_URL: jdbc:postgresql://sonar_db:5432/sonar
-      SONAR_JDBC_USERNAME: sonar
-      SONAR_JDBC_PASSWORD: sonar
-    ports:
-      - "9001:9000"
-    volumes:
-      - sonarqube_conf:/opt/sonarqube/conf
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
-      - sonarqube_temp:/opt/sonarqube/temp
-
-  sonar_db:
-    image: postgres:13
+  postgresql:
+    image: postgres:17
+    container_name: postgres
+    hostname: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       POSTGRES_USER: sonar
       POSTGRES_PASSWORD: sonar
       POSTGRES_DB: sonar
     volumes:
-      - sonar_db:/var/lib/postgresql
-      - sonar_db_data:/var/lib/postgresql/data
+      - postgresql_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - ${NETWORK_TYPE:-ipv4}
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    hostname: sonarqube
+    read_only: true
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    ports:
+      - "9000:9000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "grep -q 'SonarQube is operational' /opt/sonarqube/logs/sonar.log || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    networks:
+      - ${NETWORK_TYPE:-ipv4}
+
+  dbgate:
+    image: dbgate/dbgate
+    restart: always
+    volumes:
+      - dbgate-data:/root/.dbgate
+    ports:
+      - "80:3000"
+    environment:
+      CONNECTIONS: con1
+      LABEL_con1: Sonar
+      ENGINE_con1: postgres@dbgate-plugin-postgres
+      URL_con1: postgresql://sonar:sonar@postgres:5432/sonar
+    networks:
+      - ${NETWORK_TYPE:-ipv4}
 
 volumes:
-  sonarqube_conf:
-  sonarqube_data:
-  sonarqube_extensions:
-  sonarqube_logs:
-  sonarqube_temp:
-  sonar_db:
-  sonar_db_data:
+  postgresql_data:
+  dbgate-data:
+
+networks:
+  ipv4:
+    driver: bridge
+  dual:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: "192.168.2.0/24"
+          gateway: "192.168.2.1"
+        - subnet: "2001:db8:2::/64"
+          gateway: "2001:db8:2::1"

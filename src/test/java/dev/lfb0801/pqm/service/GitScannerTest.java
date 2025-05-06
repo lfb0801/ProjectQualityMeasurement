@@ -17,14 +17,14 @@ import static java.util.stream.Stream.concat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-class GitCounterTest extends GitFSEnvironment {
+class GitScannerTest extends GitFSEnvironment {
 
 
     @Test
     @DisplayName("If the second commit removes 1 of the files, then only the remaining file will be returned")
     void happyFlow() throws IOException {
 
-        GitCounter gitCounter = new GitCounter(local);
+        GitScanner gitScanner = new GitScanner(local);
         final String deletedFile = "deleted.txt";
         final String remainingFile = "remaining.txt";
 
@@ -44,9 +44,9 @@ class GitCounterTest extends GitFSEnvironment {
                 }
         ));
 
-        var everyCommittedFile = gitCounter.getFilesInRepository();
+        var everyCommittedFile = gitScanner.getFilesInRepository();
         var commitCountPerFile = Stream.of(remainingFile, deletedFile)
-                                       .map(uncheck(gitCounter::countCommits))
+                                       .map(uncheck(gitScanner::countCommits))
                                        .collect(Collectors.toMap(Map.Entry::getKey,
                                                                  Map.Entry::getValue
                                        ));
@@ -66,7 +66,7 @@ class GitCounterTest extends GitFSEnvironment {
     @DisplayName("Let's test if my implementation breaks when there are a lot of commits")
     void loadTest() throws IOException {
 
-        GitCounter gitCounter = new GitCounter(local);
+        GitScanner gitScanner = new GitScanner(local);
         final String file = "remaining.txt";
 
         performCommits(concat(
@@ -81,9 +81,9 @@ class GitCounterTest extends GitFSEnvironment {
                          })
         ).toList());
 
-        var everyCommittedFile = gitCounter.getFilesInRepository();
+        var everyCommittedFile = gitScanner.getFilesInRepository();
         var commitCountPerFile = Stream.of(file)
-                                       .map(uncheck(gitCounter::countCommits))
+                                       .map(uncheck(gitScanner::countCommits))
                                        .collect(Collectors.toMap(Map.Entry::getKey,
                                                                  Map.Entry::getValue
                                        ));

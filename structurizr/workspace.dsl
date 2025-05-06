@@ -23,7 +23,11 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             tags external api
         }
 
-        pgm = softwareSystem "Project Quality Measurement" "This project uses many different ways of collecting metrics and analysees about quality of a given project and generates a way to measure change in quality over time" {
+        pqm = softwareSystem "Project Quality Measurement" "This project uses many different ways of collecting metrics and analysees about quality of a given project and generates a way to measure change in quality over time" {
+            database = container "db" "Stores different Scanner and aggregates, (potentially even diffs)" {
+                tags internal db
+            }
+
             frontend = container "simple web-app" "Offers a way to compare the compare metrics between given git tags" "NOT IMPLEMENTED" {
                 tags webBrowser notImplemented
             }
@@ -42,34 +46,52 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
                     tags internal component
                 }
 
+                aggregator = component "Scan aggregator" "aggregates results from the different scanners" {
+                    tags internal component notImplemented
+                }
+
+                diffScanner = component "diffScanner" "Attempts to report the differences between multiple aggregates"{
+                    tags internal component notImplemented
+                }
+
                 sonarScanner -> sonarServer "retrieves scan results from"
+
                 gitScanner -> sonarScanner "triggers when opening a new state"
                 gitScanner -> fsScanner "triggers when opening a new state"
-                gitScanner -> targetProject "applies git operations to"
+                gitScanner -> targetProject "analyzes git behaviour"
+
                 fsScanner -> targetProject "looks at the file system/folder structure and file content in"
+
+                aggregator -> gitScanner "uses"
+                aggregator -> fsScanner "uses"
+                aggregator -> sonarScanner "uses"
+
+
+                diffScanner -> aggregator "retrieves multiple aggregates"
 
                 tags internal api
             }
 
-            frontend -> backend "ask for comparison of 2 git tags"
+            frontend -> diffScanner "ask for comparison of 2 git tags"
+            backend -> database "persists in"
 
             tags internal
         }
 
+
         user -> targetProject "commits and works on"
-        user -> pgm "uses"
+        user -> pqm "uses"
         user -> frontend "Interacts with"
 
-        backend -> targetProject "analyzes"
         sonarServer -> targetProject "analyzes"
-        backend -> sonarServer "retrieves analysees"
+        pqm -> sonarServer "retrieves analysees"
     }
 
     !docs docs
     !adrs decisions
 
     views {
-        systemLandscape pgm {
+        systemLandscape pqm {
             include *
             autolayout lr
         }
@@ -80,7 +102,7 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             autolayout lr
         }
 
-        container pgm {
+        container pqm {
             include *
             autolayout lr
         }

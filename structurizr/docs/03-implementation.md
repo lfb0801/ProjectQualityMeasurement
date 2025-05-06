@@ -6,13 +6,14 @@ In this section I will explain the building-blocks of my implementation.
 
 I am able to make detailed scans over the content of source files.
 Thanks to the [LOCC4J](https://github.com/cthing/locc4j) library.
-This allows me to ignore blank and comments in my analysis.
+This allows me to ignore blank-lines and comments in my analysis.
+
+Based on the research: [on how many lines of code can a developer maintain](), we learned that it isn't just important to look at the LoC,
+but that we should view churn on modules as an important metric for determining quality.
 
 ### JGit
 
-Thanks to [JGit](https://github.com/eclipse-jgit/jgit?tab=readme-ov-file#java-git) I am able to interact with the VCS of
-the given project and
-filter/focus on specific parts.
+Thanks to [JGit](https://github.com/eclipse-jgit/jgit?tab=readme-ov-file#java-git) I am able to interact with the VCS of the given project and analyze the behaviour of the developers inside the project.
 
 It also allows me to increase the interval of analysis.
 This is important as running my analysis on every build/commit would be expensive and wouldn't align with my research.
@@ -28,4 +29,4 @@ This is only a cherry on the cake for my project, as it is mostly concerned the 
 #### SonarQube also does LOC
 
 The main reason why we don't use the LOC from SonarQube, is because SonarQube only looks at programming languages.
-Therefor relying on SonarQube for LOC, would not be able to detect a problem caused by config files.
+Therefore, relying on SonarQube for LOC, would not be able to detect a problem caused by config files.

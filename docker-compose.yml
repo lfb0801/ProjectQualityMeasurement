@@ -7,6 +7,8 @@ services:
       - "9797:8080"
     networks:
       - ${NETWORK_TYPE:-ipv4}
+    profiles:
+      - docs
 
   plantuml-server:
     image: plantuml/plantuml-server:tomcat
@@ -14,6 +16,8 @@ services:
       - "9898:8080"
     networks:
       - ${NETWORK_TYPE:-ipv4}
+    profiles:
+      - docs
 
   postgresql:
     image: postgres:17
@@ -32,6 +36,8 @@ services:
       - postgresql_data:/var/lib/postgresql/data
     networks:
       - ${NETWORK_TYPE:-ipv4}
+    profiles:
+      - local
 
   sonarqube:
     image: sonarqube:community
@@ -59,6 +65,8 @@ services:
       start_period: 5s
     networks:
       - ${NETWORK_TYPE:-ipv4}
+    profiles:
+      - local
 
   dbgate:
     image: dbgate/dbgate
@@ -74,6 +82,8 @@ services:
       URL_con1: postgresql://sonar:sonar@postgres:5432/sonar
     networks:
       - ${NETWORK_TYPE:-ipv4}
+    profiles:
+      - local
 
 volumes:
   postgresql_data:

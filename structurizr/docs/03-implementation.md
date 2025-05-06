@@ -19,12 +19,13 @@ This is important as running my analysis on every build/commit would be expensiv
 
 ### SonarQube
 
-Using a local version of SonarQube:
+In this project I use a local version of SonarQube, but normally I would expect a company to have already setup their
+own SonarQube instance somewhere.
 
-````shell
-mvn clean verify sonar:sonar \
-  -Dsonar.projectKey=Project-Quality-Measurement \
-  -Dsonar.projectName='Project Quality Measurement' \
-  -Dsonar.host.url=http://localhost:9000 \
-  -Dsonar.token=sqp_6a0467fd7a672b9c15428c1be97e07d271079388
-````
+The reason I'm using SonarQube, is to make it do the Static Code Analysis.
+This is only a cherry on the cake for my project, as it is mostly concerned the [JGit](#JGit) analysis
+
+#### SonarQube also does LOC
+
+The main reason why we don't use the LOC from SonarQube, is because SonarQube only looks at programming languages.
+Therefor relying on SonarQube for LOC, would not be able to detect a problem caused by config files.

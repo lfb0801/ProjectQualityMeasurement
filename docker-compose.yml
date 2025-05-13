@@ -7,6 +7,8 @@ services:
       - "9797:8080"
     networks:
       - ${NETWORK_TYPE:-ipv4}
+    depends_on:
+      - plantuml-server
     profiles:
       - docs
 

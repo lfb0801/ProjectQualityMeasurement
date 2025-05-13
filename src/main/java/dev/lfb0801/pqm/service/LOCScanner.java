@@ -14,7 +14,6 @@ import java.util.Map;
 @Service
 public class LOCScanner {
 
-
     private final String path;
 
     public LOCScanner(@Value("${quality.path}") String path) {

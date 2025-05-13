@@ -13,18 +13,21 @@ import java.nio.file.Path;
 @Configuration
 public class GitConfiguration {
 
-    @Value("quality.path")
-    String path;
+    private final String path;
 
-    @Bean
-    public Repository repo() throws IOException {
-        return new RepositoryBuilder()
-                .setGitDir(Path.of(path).toFile())
-                .build();
+    public GitConfiguration(@Value("${quality.path}") String path) {
+        this.path = path;
     }
 
     @Bean
-    public Git git(Repository repo){
+    public Repository repo() throws IOException {
+        return new RepositoryBuilder().setGitDir(Path.of(path)
+                                                     .toFile())
+                                      .build();
+    }
+
+    @Bean
+    public Git git(Repository repo) {
         return new Git(repo);
     }
 }

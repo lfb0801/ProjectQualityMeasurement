@@ -2,7 +2,7 @@ services:
   structurizr:
     image: structurizr/lite
     volumes:
-      - ./structurizr:/usr/local/structurizr
+      - ./documentation:/usr/local/structurizr
     ports:
       - "9797:8080"
     networks:

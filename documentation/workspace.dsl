@@ -32,7 +32,7 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
                 tags webBrowser notImplemented
             }
 
-            backend = container "api" "Creates several metrics based on the target project" "java/spring" {
+            backend = container "Quality Measurement Server" "Creates several metrics based on the target project" "java/spring" {
 
                 sonarScanner = component "Sonar scanner" {
                     tags internal component
@@ -50,7 +50,7 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
                     tags internal component notImplemented
                 }
 
-                diffScanner = component "diffScanner" "Attempts to report the differences between multiple aggregates"{
+                diffScanner = component "diffScanner" "Attempts to report the differences between multiple aggregates" {
                     tags internal component notImplemented
                 }
 
@@ -66,9 +66,9 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
                 aggregator -> fsScanner "uses"
                 aggregator -> sonarScanner "uses"
 
-
                 diffScanner -> aggregator "retrieves multiple aggregates"
 
+                !docs docs/api
                 tags internal api
             }
 

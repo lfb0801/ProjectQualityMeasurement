@@ -1,9 +1,5 @@
 package dev.lfb0801.pqm.service;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Map;
-
 import org.cthing.locc4j.CountUtils;
 import org.cthing.locc4j.CountingTreeWalker;
 import org.cthing.locc4j.Counts;
@@ -11,13 +7,19 @@ import org.cthing.locc4j.Language;
 import org.eclipse.jgit.api.Git;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Map;
+
 @Service
 public class LOCScanner {
 
     private final Path path;
 
     public LOCScanner(Git git) {
-        this.path = git.getRepository().getWorkTree().toPath();
+        this.path = git.getRepository()
+                       .getWorkTree()
+                       .toPath();
     }
 
     public Map<Path, Counts> scanSources() throws IOException {
@@ -30,9 +32,9 @@ public class LOCScanner {
 
     private Map<Path, Counts> matchPattern(String pattern) throws IOException {
         var walker = //
-            new CountingTreeWalker(path, pattern)
-            .respectGitignore(true)
-            .countDocStrings(false);
+                new CountingTreeWalker(path, pattern)
+                        .respectGitignore(true)
+                        .countDocStrings(false);
 
         Map<Path, Map<Language, Counts>> counts = walker.count();
 

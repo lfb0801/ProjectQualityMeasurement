@@ -1,14 +1,5 @@
 package dev.lfb0801.pqm.config;
 
-import static java.util.Comparator.reverseOrder;
-
-import static dev.lfb0801.pqm.Constants.TARGET_PATH;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
@@ -17,6 +8,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static dev.lfb0801.pqm.Constants.TARGET_PATH;
+import static java.util.Comparator.reverseOrder;
 
 @Configuration
 @ComponentScan(basePackages = "dev.lfb0801.pqm")
@@ -33,15 +32,15 @@ public class PqmConfiguration {
         Path foo = Path.of(TARGET_PATH.value);
         if (Files.exists(foo)) {
             Files.walk(foo)
-                .sorted(reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
+                 .sorted(reverseOrder())
+                 .map(Path::toFile)
+                 .forEach(File::delete);
         }
         Files.createDirectory(foo);
 
         return new RepositoryBuilder().setWorkTree(new File(foo.toString()))
-            .setup()
-            .build();
+                                      .setup()
+                                      .build();
     }
 
     @Bean
@@ -49,9 +48,9 @@ public class PqmConfiguration {
         Git git = new Git(repo);
         try {
             Git.cloneRepository()
-                .setURI(targetPath)
-                .setDirectory(repo.getWorkTree())
-                .call();
+               .setURI(targetPath)
+               .setDirectory(repo.getWorkTree())
+               .call();
         } catch (GitAPIException e) {
             throw new IllegalArgumentException("Repository should already exist", e);
         }

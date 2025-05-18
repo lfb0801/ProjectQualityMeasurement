@@ -1,6 +1,10 @@
 package dev.lfb0801.pqm.service;
 
-import static dev.lfb0801.pqm.domain.Aggregate.build;
+import dev.lfb0801.pqm.domain.Aggregate;
+import org.cthing.locc4j.Counts;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,12 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.cthing.locc4j.Counts;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.springframework.stereotype.Service;
-
-import dev.lfb0801.pqm.domain.Aggregate;
+import static dev.lfb0801.pqm.domain.Aggregate.build;
 
 @Service
 public class AggregateService {
@@ -36,27 +35,30 @@ public class AggregateService {
         var tests = locScanner.scanTests();
 
         return files.stream()
-            .map(file -> build(aggregate -> aggregate //
-                .file(file)
-                .locSrc(getLinesOfCodeFor(sources, file))
-                .locTest(getLinesOfCodeFor(tests, file))
-                .commits(getCommits(file))))
-            .collect(Collectors.toSet());
+                    .map(file -> build(aggregate -> aggregate //
+                                                              .file(file)
+                                                              .locSrc(getLinesOfCodeFor(sources, file))
+                                                              .locTest(getLinesOfCodeFor(tests, file))
+                                                              .commits(getCommits(file))))
+                    .collect(Collectors.toSet());
     }
 
     private int getCommits(String file) {
         try {
-            return gitScanner.countCommits(file)
-                .getValue()
-                .intValue();
+            return gitScanner.getCommitsContainingFile(file)
+                             .getValue()
+                             .size();
         } catch (GitAPIException | IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private int getLinesOfCodeFor(Map<Path, Counts> scanResult, String file) {
-            return Optional.ofNullable(scanResult.getOrDefault(new File(git.getRepository().getWorkTree(), file).toPath(), null))
-                .map(Counts::getCodeLines)
-                .orElse(0);
+        return Optional.ofNullable(scanResult.getOrDefault(new File(git.getRepository()
+                                                                       .getWorkTree(), file
+                                                           ).toPath(), null
+                       ))
+                       .map(Counts::getCodeLines)
+                       .orElse(0);
     }
 }

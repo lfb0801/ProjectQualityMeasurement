@@ -1,10 +1,9 @@
 package dev.lfb0801.pqm.service;
 
-import static java.util.stream.Stream.concat;
-
-import static dev.lfb0801.pqm.Unchecked.uncheck;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import dev.lfb0801.pqm.Unchecked;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,11 +13,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import dev.lfb0801.pqm.Unchecked;
+import static dev.lfb0801.pqm.Unchecked.uncheck;
+import static java.util.stream.Stream.concat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 class GitScannerTest extends GitFSEnvironment {
 
@@ -39,20 +37,23 @@ class GitScannerTest extends GitFSEnvironment {
                                    appendToFile(remainingFile, "Salve Mundi!");
                                }, () -> {
                                    new File(local.getRepository()
-                                                .getWorkTree(), deletedFile
+                                                 .getWorkTree(), deletedFile
                                    ).delete();
                                }
         ));
 
         var everyCommittedFile = gitScanner.getFilesInRepository();
         var commitCountPerFile = Stream.of(remainingFile, deletedFile)
-            .map(uncheck(gitScanner::countCommits))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                                       .map(uncheck(gitScanner::getCommitsContainingFile))
+                                       .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                 stringSetEntry -> stringSetEntry.getValue()
+                                                                                                 .size()
+                                       ));
 
         assertThat(everyCommittedFile).contains(remainingFile)
-            .doesNotContain(deletedFile);
+                                      .doesNotContain(deletedFile);
 
-        assertThat(commitCountPerFile.entrySet()).contains(entry(remainingFile, 2L), entry(deletedFile, 2L));
+        assertThat(commitCountPerFile.entrySet()).contains(entry(remainingFile, 2), entry(deletedFile, 2));
     }
 
     @Test
@@ -66,18 +67,21 @@ class GitScannerTest extends GitFSEnvironment {
                                   appendToFile(file, "");
                               }),
                               IntStream.range(1, 1000)
-                                  .mapToObj(i -> (Unchecked.ThrowingRunnable) () -> {
-                                      appendToFile(file, String.valueOf(i));
-                                  })
+                                       .mapToObj(i -> (Unchecked.ThrowingRunnable) () -> {
+                                           appendToFile(file, String.valueOf(i));
+                                       })
         ).toList());
 
         var everyCommittedFile = gitScanner.getFilesInRepository();
         var commitCountPerFile = Stream.of(file)
-            .map(uncheck(gitScanner::countCommits))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                                       .map(uncheck(gitScanner::getCommitsContainingFile))
+                                       .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                 stringSetEntry -> stringSetEntry.getValue()
+                                                                                                 .size()
+                                       ));
 
         assertThat(everyCommittedFile).contains(file);
 
-        assertThat(commitCountPerFile.entrySet()).contains(entry(file, 1000L));
+        assertThat(commitCountPerFile.entrySet()).contains(entry(file, 1000));
     }
 }

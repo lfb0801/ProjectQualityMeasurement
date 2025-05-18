@@ -35,7 +35,7 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             backend = container "Quality Measurement Server" "Creates several metrics based on the target project" "java/spring" {
 
                 sonarScanner = component "Sonar scanner" {
-                    tags internal component
+                    tags internal component notImplemented
                 }
 
                 gitScanner = component "Git scanner" "This component can perform git operations on a clone of the target project" {
@@ -47,7 +47,7 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
                 }
 
                 aggregator = component "Scan aggregator" "aggregates results from the different scanners" {
-                    tags internal component notImplemented
+                    tags internal component
                 }
 
                 diffScanner = component "diffScanner" "Attempts to report the differences between multiple aggregates" {
@@ -78,7 +78,6 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             tags internal
         }
 
-
         user -> targetProject "commits and works on"
         user -> pqm "uses"
         user -> frontend "Interacts with"
@@ -102,7 +101,7 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             autolayout lr
         }
 
-        container pqm {
+        container pqm container-pqm {
             include *
             autolayout lr
         }

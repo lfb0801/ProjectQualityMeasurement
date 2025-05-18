@@ -16,16 +16,24 @@ public class LOCScanner {
 
     private final String path;
 
-    public LOCScanner(@Value("${quality.path}") String path) {
+    public LOCScanner(@Value("${quality.target.path}") String path) {
         this.path = path;
     }
 
-    public Map<Language, Counts> matchPattern(String pattern) throws IOException {
+    private Map<Language, Counts> matchPattern(String pattern) throws IOException {
         final var walker = //
                 new CountingTreeWalker(Path.of(path), pattern)//
                                                               .respectGitignore(true)
                                                               .countDocStrings(false);
         final Map<Path, Map<Language, Counts>> counts = walker.count();
         return CountUtils.byLanguage(counts);
+    }
+
+    public Map<Language, Counts> scanSources() throws IOException {
+        return matchPattern("**/src/main/**");
+    }
+
+    public Map<Language, Counts> scanTests() throws IOException {
+        return matchPattern("**/src/test/**");
     }
 }

@@ -33,7 +33,7 @@ jobs:
             libxcomposite1 \
             libxdamage1 \
             libxrandr2
-          npm install puppeteer
+          npm install puppeteer cheerio
           npx puppeteer browsers install chromium@latest
 
       - name: Setup Docker Compose

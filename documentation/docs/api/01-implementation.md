@@ -23,11 +23,15 @@ I am able to make detailed scans over the content of source files.
 Thanks to the [LOCC4J](https://github.com/cthing/locc4j) library.
 This allows me to ignore blank-lines and comments in my analysis.
 
-![]()
-
 Based on the research: [on how many lines of code can a developer maintain](), we learned that it isn't just important
 to look at the LoC,
 but that we should view churn on modules as an important metric for determining quality.
+
+<details open>
+<summary>This implementation shows how I can use the LOCC4J library to make the distinction between Source and Test code</summary>
+<br>
+<img src="../../images/LoCScannerImpl.png" alt="LOCC4J-impl">
+</details>
 
 ### GitScanner (JGit)
 
@@ -37,12 +41,17 @@ the given project and analyze the behavior of the developers inside the project.
 It also allows me to increase the interval of analysis.
 This is important as running my analysis on every build/commit would be expensive and wouldn't align with my research.
 
-The JGit library allows us to create any complex Git-operation. 
+<details open>
+<summary>
+The JGit library allows us to create any complex Git-operation.
 Using the following methods we can figure out how often a commit contained the given file.
-
-![](../../images/countCommitsImpl1.png)
-
-This would allow us to figure out how often people edit the given file, which is potentially a bad sign.
+</summary>
+<img src="../../images/countCommitsImpl1.png" alt="JGit-impl">
+<br>
+<p>
+This will allow us to figure out how often people edit the given file, which is potentially a bad sign.
+</p>
+</details>
 
 ### SonarQube (Not implemented)
 

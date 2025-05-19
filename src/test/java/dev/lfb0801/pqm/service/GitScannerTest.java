@@ -1,8 +1,10 @@
 package dev.lfb0801.pqm.service;
 
-import dev.lfb0801.pqm.util.Unchecked;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static java.util.stream.Stream.concat;
+
+import static dev.lfb0801.pqm.util.Unchecked.uncheck;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,54 +14,45 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static dev.lfb0801.pqm.util.Unchecked.uncheck;
-import static java.util.stream.Stream.concat;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import dev.lfb0801.pqm.util.Unchecked;
 
 class GitScannerTest extends GitFSEnvironment {
 
-
     @Test
     @DisplayName("If the second commit removes 1 of the files, then only the remaining file will be returned")
-    void happyFlow() throws IOException {
+    void happyFlow() throws IOException, GitAPIException {
 
         GitScanner gitScanner = new GitScanner(local);
         final String deletedFile = "deleted.txt";
         final String remainingFile = "remaining.txt";
 
-        performCommits(List.of(
-                () -> {
-                    createFile(deletedFile);
-                    createFile(remainingFile);
+        performCommits(List.of(() -> {
+                                   createFile(deletedFile);
+                                   createFile(remainingFile);
 
-                    writeToFile(deletedFile, "Hello World!");
-                },
-                () -> {
-                    writeToFile(remainingFile, "Salve Mundi!");
-                },
-                () -> {
-                    new File(local.getRepository()
-                                  .getWorkTree(), deletedFile).delete();
-                }
+                                   writeToFile(deletedFile, "Hello World!");
+                               }, () -> {
+                                   writeToFile(remainingFile, "Salve Mundi!");
+                               }, () -> {
+                                   new File(local.getRepository()
+                                                .getWorkTree(), deletedFile
+                                   ).delete();
+                               }
         ));
 
         var everyCommittedFile = gitScanner.getFilesInRepository();
         var commitCountPerFile = Stream.of(remainingFile, deletedFile)
-                                       .map(uncheck(gitScanner::countCommits))
-                                       .collect(Collectors.toMap(Map.Entry::getKey,
-                                                                 Map.Entry::getValue
-                                       ));
+            .map(uncheck(gitScanner::countCommits))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        assertThat(everyCommittedFile)
-                .contains(remainingFile)
-                .doesNotContain(deletedFile);
+        assertThat(everyCommittedFile).contains(remainingFile)
+            .doesNotContain(deletedFile);
 
-        assertThat(commitCountPerFile.entrySet())
-                .contains(
-                        entry(remainingFile, 3L),
-                        entry(deletedFile, 2L)
-                );
+        assertThat(commitCountPerFile.entrySet()).contains(entry(remainingFile, 2L), entry(deletedFile, 2L));
     }
 
     @Test
@@ -69,31 +62,22 @@ class GitScannerTest extends GitFSEnvironment {
         GitScanner gitScanner = new GitScanner(local);
         final String file = "remaining.txt";
 
-        performCommits(concat(
-                Stream.of(
-                        () -> {
-                            createFile(file);
-                        }
-                ),
-                IntStream.range(1, 1000)
-                         .mapToObj(i -> (Unchecked.ThrowingRunnable) () -> {
-                             appendToFile(file, String.valueOf(i));
-                         })
+        performCommits(concat(Stream.of(() -> {
+                                  createFile(file);
+                              }),
+                              IntStream.range(1, 1000)
+                                  .mapToObj(i -> (Unchecked.ThrowingRunnable) () -> {
+                                      appendToFile(file, String.valueOf(i));
+                                  })
         ).toList());
 
         var everyCommittedFile = gitScanner.getFilesInRepository();
         var commitCountPerFile = Stream.of(file)
-                                       .map(uncheck(gitScanner::countCommits))
-                                       .collect(Collectors.toMap(Map.Entry::getKey,
-                                                                 Map.Entry::getValue
-                                       ));
+            .map(uncheck(gitScanner::countCommits))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        assertThat(everyCommittedFile)
-                .contains(file);
+        assertThat(everyCommittedFile).contains(file);
 
-        assertThat(commitCountPerFile.entrySet())
-                .contains(
-                        entry(file, 1000L)
-                );
+        assertThat(commitCountPerFile.entrySet()).contains(entry(file, 1000L));
     }
 }

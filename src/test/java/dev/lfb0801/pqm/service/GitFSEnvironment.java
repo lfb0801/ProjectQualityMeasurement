@@ -3,9 +3,9 @@ package dev.lfb0801.pqm.service;
 import static dev.lfb0801.pqm.util.Unchecked.uncheck;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -60,20 +60,18 @@ public abstract class GitFSEnvironment {
         }
     }
 
-    public static void writeToFile(String file, String content) throws IOException {
+    public static void writeToFile(String relativePath, String content) throws IOException {
+        File file = new File(local.getRepository().getWorkTree(), relativePath);
         try (var fos = new FileOutputStream(file)) {
-            fos.write(content.getBytes());
+            fos.write(content.getBytes(StandardCharsets.UTF_8));
         }
     }
 
-    public static void appendToFile(String file, String content) throws IOException {
-        try (var fis = new FileInputStream(file)) {
-            var old = new String(fis.readAllBytes());
-            try (var fos = new FileOutputStream(file)) {
-                fos.write(old.concat("\n")
-                              .concat(content)
-                              .getBytes());
-            }
+    public static void appendToFile(String relativePath, String content) throws IOException {
+        File file = new File(local.getRepository().getWorkTree(), relativePath);
+        String old = file.exists() ? Files.contentOf(file, StandardCharsets.UTF_8) : "";
+        try (var fos = new FileOutputStream(file)) {
+            fos.write((old + "\n" + content).getBytes(StandardCharsets.UTF_8));
         }
     }
 

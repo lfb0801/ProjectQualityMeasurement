@@ -20,7 +20,7 @@ jobs:
           version: latest
 
       - name: Start structurizr
-        run: docker-compose --profile docs up -d
+        run: docker compose --profile docs up -d
 
       - name: Wait for Structurizr to be ready
         run: |

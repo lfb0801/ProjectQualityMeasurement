@@ -1,0 +1,43 @@
+name: Generate Structurizr Docs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Compose
+        run: docker-compose --profile docs up -d
+
+      - name: Wait for Structurizr to be ready
+        run: |
+          echo "Waiting for Structurizr UI on port 9797..."
+          for i in {1..30}; do
+            if curl -s http://localhost:9797/ > /dev/null; then
+              echo "Structurizr UI is up."
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install Puppeteer (used in scripting API for static export)
+        run: npm install puppeteer
+
+      - name: Run Structurizr export script
+        run: node ./documentation/export.js
+
+      - name: Upload static site artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: structurizr-docs
+          path: ./documentation/output

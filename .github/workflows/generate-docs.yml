@@ -20,7 +20,7 @@ jobs:
           node-version: 22
 
       - name: Install Puppeteer dependencies
-        run: npx puppeteer browsers install chromium
+        run: npx puppeteer browsers install chromium@latest
 
       - name: Setup Docker Compose
         uses: docker/setup-compose-action@v1

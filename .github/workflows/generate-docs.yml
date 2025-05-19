@@ -19,28 +19,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Puppeteer (used in scripting API for static export)
-        run: npm install puppeteer
-
-      - name: Install dependencies for sandbox?
-        run: |
-            sudo apt-get update
-            sudo apt-get install -y --no-install-recommends \
-                gconf-service \
-                libasound2 \
-                libatk1.0-0 \
-                libcups2 \
-                libdbus-1-3 \
-                libgconf-2-4 \
-                libgtk-3-0 \
-                libnspr4 \
-                libnss3 \
-                libx11-xcb1 \
-                libxcomposite1 \
-                libxdamage1 \
-                libxrandr2 \
-                xdg-utils \
-                libgbm-dev
+      - name: Install Puppeteer dependencies
+        run: npx puppeteer browsers install chromium
 
       - name: Setup Docker Compose
         uses: docker/setup-compose-action@v1

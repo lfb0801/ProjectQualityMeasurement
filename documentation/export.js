@@ -4,7 +4,6 @@ const fs = require('fs');
 const IGNORE_HTTPS_ERRORS = true;
 const HEADLESS = true;
 
-// URL is now hardcoded
 const url = 'http://localhost:9797';
 
 (async () => {

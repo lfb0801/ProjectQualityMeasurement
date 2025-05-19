@@ -20,7 +20,21 @@ jobs:
           node-version: 22
 
       - name: Install Puppeteer dependencies
-        run: npx puppeteer browsers install chromium@latest
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libxss1 \
+            libgtk-3-0 \
+            libgbm1 \
+            libasound2t64 \
+            libxshmfence1 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2
+          npm install puppeteer
+          npx puppeteer browsers install chromium@latest
 
       - name: Setup Docker Compose
         uses: docker/setup-compose-action@v1

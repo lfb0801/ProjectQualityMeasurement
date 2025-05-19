@@ -14,7 +14,12 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Docker Compose
+      - name: Setup Docker Compose
+        uses: docker/setup-compose-action@v1
+        with:
+          version: latest
+
+      - name: Start structurizr
         run: docker-compose --profile docs up -d
 
       - name: Wait for Structurizr to be ready

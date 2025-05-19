@@ -56,10 +56,7 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
 
                 sonarScanner -> sonarServer "retrieves scan results from"
 
-                gitScanner -> sonarScanner "triggers when opening a new state"
-                gitScanner -> fsScanner "triggers when opening a new state"
                 gitScanner -> targetProject "analyzes git behaviour"
-
                 fsScanner -> targetProject "looks at the file system/folder structure and file content in"
 
                 aggregator -> gitScanner "uses"

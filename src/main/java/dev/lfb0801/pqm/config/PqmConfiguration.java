@@ -48,7 +48,7 @@ public class PqmConfiguration {
     public Git git(Repository repo) {
         Git git = new Git(repo);
         try {
-            git.cloneRepository()
+            Git.cloneRepository()
                 .setURI(path)
                 .setDirectory(repo.getWorkTree())
                 .call();

@@ -65,7 +65,6 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
 
                 diffScanner -> aggregator "retrieves multiple aggregates"
 
-                !docs docs/api
                 tags internal api
             }
 

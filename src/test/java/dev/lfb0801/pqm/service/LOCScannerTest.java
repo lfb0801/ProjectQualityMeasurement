@@ -37,7 +37,7 @@ class LOCScannerTest {
     private String getProjectRoot() {
         return Optional.of(this.getClass())
             .map(Class::getClassLoader)
-            .map(cl -> cl.getResource(""))
+            .map(cl -> cl.getResource("."))
             .map(uncheck((URL url) -> Path.of(url.toURI())))
             .map(Path::getParent)
             .map(Path::getParent)

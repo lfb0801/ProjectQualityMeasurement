@@ -1,0 +1,65 @@
+name: Generate Structurizr Docs
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Puppeteer dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libxss1 \
+            libgtk-3-0 \
+            libgbm1 \
+            libasound2t64 \
+            libxshmfence1 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2
+          npm install puppeteer cheerio
+          npx puppeteer browsers install chromium@latest
+
+      - name: Setup Docker Compose
+        uses: docker/setup-compose-action@v1
+        with:
+          version: latest
+
+      - name: Start structurizr
+        run: docker compose --profile docs up -d
+
+      - name: Wait for Structurizr to be ready
+        run: |
+          echo "Waiting for Structurizr UI on port 9797..."
+          for i in {1..30}; do
+            if curl -s http://localhost:9797/ > /dev/null; then
+              echo "Structurizr UI is up."
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Run Structurizr export script
+        run: node ./documentation/export.js
+
+      - name: Upload static site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: structurizr-docs
+          path: ./documentation/output

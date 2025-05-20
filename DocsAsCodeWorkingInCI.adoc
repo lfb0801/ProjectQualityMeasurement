@@ -10,7 +10,7 @@ This allows us to export/deploy the documentation whenever a new PR/MR is create
 === Design choices:
 
 - We use the same docker-compose from the local-environment (Because consistency is key)
-- We then use an export-script (because that is the only way structurizr can generate an HTML output)
+- We then use an export-script (because that is the only way structurizr can generate a PDF output)
 
 === Surprising performance
 

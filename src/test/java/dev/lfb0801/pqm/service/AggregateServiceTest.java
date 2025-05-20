@@ -14,7 +14,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import dev.lfb0801.pqm.config.PqmConfiguration;
-import dev.lfb0801.pqm.util.Unchecked;
+import dev.lfb0801.pqm.Unchecked;
 
 @SpringBootTest(classes = PqmConfiguration.class)
 class AggregateServiceTest extends GitFSEnvironment {

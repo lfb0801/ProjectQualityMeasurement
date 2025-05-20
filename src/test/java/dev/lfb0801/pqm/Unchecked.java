@@ -1,4 +1,4 @@
-package dev.lfb0801.pqm.util;
+package dev.lfb0801.pqm;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;

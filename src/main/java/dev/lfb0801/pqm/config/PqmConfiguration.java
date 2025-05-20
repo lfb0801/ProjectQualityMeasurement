@@ -22,10 +22,10 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = "dev.lfb0801.pqm")
 public class PqmConfiguration {
 
-    private final String path;
+    private final String targetPath;
 
-    public PqmConfiguration(@Value("${quality.target.path}") String path) {
-        this.path = path;
+    public PqmConfiguration(@Value("${quality.target.path}") String targetPath) {
+        this.targetPath = targetPath;
     }
 
     @Bean
@@ -49,7 +49,7 @@ public class PqmConfiguration {
         Git git = new Git(repo);
         try {
             Git.cloneRepository()
-                .setURI(path)
+                .setURI(targetPath)
                 .setDirectory(repo.getWorkTree())
                 .call();
         } catch (GitAPIException e) {

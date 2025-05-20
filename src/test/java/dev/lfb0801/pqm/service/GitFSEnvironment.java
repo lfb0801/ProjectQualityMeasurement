@@ -1,6 +1,6 @@
 package dev.lfb0801.pqm.service;
 
-import static dev.lfb0801.pqm.util.Unchecked.uncheck;
+import static dev.lfb0801.pqm.Unchecked.uncheck;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,8 +16,8 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
-import dev.lfb0801.pqm.util.Unchecked;
-import dev.lfb0801.pqm.util.Unchecked.ThrowingConsumer;
+import dev.lfb0801.pqm.Unchecked;
+import dev.lfb0801.pqm.Unchecked.ThrowingConsumer;
 
 public abstract class GitFSEnvironment {
 

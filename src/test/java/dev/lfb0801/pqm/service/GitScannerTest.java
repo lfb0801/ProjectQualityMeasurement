@@ -2,7 +2,7 @@ package dev.lfb0801.pqm.service;
 
 import static java.util.stream.Stream.concat;
 
-import static dev.lfb0801.pqm.util.Unchecked.uncheck;
+import static dev.lfb0801.pqm.Unchecked.uncheck;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
@@ -18,7 +18,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import dev.lfb0801.pqm.util.Unchecked;
+import dev.lfb0801.pqm.Unchecked;
 
 class GitScannerTest extends GitFSEnvironment {
 

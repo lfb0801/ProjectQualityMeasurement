@@ -24,10 +24,10 @@ public class AggregateService {
     private final GitScanner gitScanner;
     private final Git git;
 
-    public AggregateService(Git git) {
+    public AggregateService(LOCScanner locScanner, GitScanner gitScanner, Git git) {
+        this.locScanner = locScanner;
+        this.gitScanner = gitScanner;
         this.git = git;
-        this.locScanner = new LOCScanner(git.getRepository().getWorkTree().toPath().toString());
-        this.gitScanner = new GitScanner(git);
     }
 
     public Set<Aggregate> aggregate() throws IOException {

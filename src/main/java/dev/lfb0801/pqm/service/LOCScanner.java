@@ -8,16 +8,16 @@ import org.cthing.locc4j.CountUtils;
 import org.cthing.locc4j.CountingTreeWalker;
 import org.cthing.locc4j.Counts;
 import org.cthing.locc4j.Language;
-import org.springframework.beans.factory.annotation.Value;
+import org.eclipse.jgit.api.Git;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LOCScanner {
 
-    private final String path;
+    private final Path path;
 
-    public LOCScanner(@Value("${quality.target.path}") String path) {
-        this.path = path;
+    public LOCScanner(Git git) {
+        this.path = git.getRepository().getWorkTree().toPath();
     }
 
     public Map<Path, Counts> scanSources() throws IOException {
@@ -30,7 +30,7 @@ public class LOCScanner {
 
     private Map<Path, Counts> matchPattern(String pattern) throws IOException {
         var walker = //
-            new CountingTreeWalker(Path.of(path), pattern)
+            new CountingTreeWalker(path, pattern)
             .respectGitignore(true)
             .countDocStrings(false);
 

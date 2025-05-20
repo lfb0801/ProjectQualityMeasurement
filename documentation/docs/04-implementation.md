@@ -29,7 +29,7 @@ but that we should view churn on modules as an important metric for determining 
 
 This implementation shows how I can use the LOCC4J library to make the distinction between Source and Test code
 
-![](./images/LocScannerImpl.png)
+![](./images/LoCScannerImpl.png)
 
 ### GitScanner (JGit)
 

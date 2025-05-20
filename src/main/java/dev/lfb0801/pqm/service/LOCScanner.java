@@ -20,20 +20,22 @@ public class LOCScanner {
         this.path = path;
     }
 
-    public Map<Language, Counts> scanSources() throws IOException {
+    public Map<Path, Counts> scanSources() throws IOException {
         return matchPattern("**/src/main/**");
     }
 
-    public Map<Language, Counts> scanTests() throws IOException {
+    public Map<Path, Counts> scanTests() throws IOException {
         return matchPattern("**/src/test/**");
     }
 
-    private Map<Language, Counts> matchPattern(String pattern) throws IOException {
-        final var walker = //
-            new CountingTreeWalker(Path.of(path), pattern)//
-                .respectGitignore(true)
-                .countDocStrings(false);
-        final Map<Path, Map<Language, Counts>> counts = walker.count();
-        return CountUtils.byLanguage(counts);
+    private Map<Path, Counts> matchPattern(String pattern) throws IOException {
+        var walker = //
+            new CountingTreeWalker(Path.of(path), pattern)
+            .respectGitignore(true)
+            .countDocStrings(false);
+
+        Map<Path, Map<Language, Counts>> counts = walker.count();
+
+        return CountUtils.byFile(counts);
     }
 }

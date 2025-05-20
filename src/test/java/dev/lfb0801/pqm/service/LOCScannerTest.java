@@ -8,8 +8,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import org.cthing.locc4j.Counts;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,15 +26,16 @@ class LOCScannerTest {
         var LOCScanner = new LOCScanner(path);
 
         var sources = Optional.ofNullable(LOCScanner.scanSources())
-            .map(s -> s.get(Java))
+            .map(Map::values)
             .orElseThrow();
         var tests = Optional.ofNullable(LOCScanner.scanTests())
-            .map(s -> s.get(Java))
+            .map(Map::values)
             .orElseThrow();
 
-        assertThat(sources).matches(c -> c.getCommentLines() == 0, "Source code should not have comments")
-            .matches(c -> c.getBlankLines() < c.getCodeLines(), "There should not be more blank than source lines")
-            .matches(c -> c.getCodeLines() < tests.getCodeLines(), "Should have more test than source code");
+        var scans = Stream.concat(sources.stream(), tests.stream())
+            .toList();
+        assertThat(scans)//
+            .allMatch(c -> c.getCodeLines() > c.getBlankLines() + c.getCommentLines());
     }
 
     private String getProjectRoot() {

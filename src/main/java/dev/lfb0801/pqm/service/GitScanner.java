@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -33,12 +35,12 @@ public class GitScanner {
     }
 
     public Set<String> getFilesInRepository() throws IOException {
-        Repository repo = git.getRepository();
+        var repo = git.getRepository();
 
-        ObjectId headId = repo.resolve(Constants.HEAD);
-        try (RevWalk revWalk = new RevWalk(git.getRepository())) {
-            RevCommit commit = revWalk.parseCommit(headId);
-            return getFilesInCommit(commit.getTree()
+        var headId = repo.resolve(Constants.HEAD);
+        try (var revWalk = new RevWalk(git.getRepository())) {
+            return getFilesInCommit(revWalk.parseCommit(headId)
+                                        .getTree()
                                         .getId());
         }
     }
@@ -46,8 +48,8 @@ public class GitScanner {
     public Map.Entry<String, Long> countCommits(String file) throws GitAPIException, IOException {
         long count = 0;
 
-        Repository repo = git.getRepository();
-        Iterable<RevCommit> commits = git.log()
+        var repo = git.getRepository();
+        var commits = git.log()
             .add(repo.resolve("HEAD"))
             .call();
 

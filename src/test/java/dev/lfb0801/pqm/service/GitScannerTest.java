@@ -31,12 +31,12 @@ class GitScannerTest extends GitFSEnvironment {
         final String remainingFile = "remaining.txt";
 
         performCommits(List.of(() -> {
-                                   createFile(deletedFile);
-                                   createFile(remainingFile);
+                                   appendToFile(deletedFile, "");
+                                   appendToFile(remainingFile, "");
 
-                                   writeToFile(deletedFile, "Hello World!");
+                                   appendToFile(deletedFile, "Hello World!");
                                }, () -> {
-                                   writeToFile(remainingFile, "Salve Mundi!");
+                                   appendToFile(remainingFile, "Salve Mundi!");
                                }, () -> {
                                    new File(local.getRepository()
                                                 .getWorkTree(), deletedFile
@@ -60,10 +60,10 @@ class GitScannerTest extends GitFSEnvironment {
     void loadTest() throws IOException {
 
         GitScanner gitScanner = new GitScanner(local);
-        final String file = "remaining.txt";
+        final String file = "new.txt";
 
         performCommits(concat(Stream.of(() -> {
-                                  createFile(file);
+                                  appendToFile(file, "");
                               }),
                               IntStream.range(1, 1000)
                                   .mapToObj(i -> (Unchecked.ThrowingRunnable) () -> {

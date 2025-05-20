@@ -13,8 +13,8 @@ import java.util.stream.IntStream;
 import org.assertj.core.util.Files;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import dev.lfb0801.pqm.util.Unchecked;
 import dev.lfb0801.pqm.util.Unchecked.ThrowingConsumer;
@@ -60,52 +60,36 @@ public abstract class GitFSEnvironment {
         }
     }
 
-    public static void writeToFile(String relativePath, String content) throws IOException {
-        File file = new File(local.getRepository().getWorkTree(), relativePath);
-        try (var fos = new FileOutputStream(file)) {
-            fos.write(content.getBytes(StandardCharsets.UTF_8));
-        }
-    }
-
     public static void appendToFile(String relativePath, String content) throws IOException {
-        File file = new File(local.getRepository().getWorkTree(), relativePath);
+        File file = new File(local.getRepository()
+                                 .getWorkTree(), relativePath
+        );
+        File parent = file.getParentFile();
+        if (parent != null) parent.mkdirs();
         String old = file.exists() ? Files.contentOf(file, StandardCharsets.UTF_8) : "";
         try (var fos = new FileOutputStream(file)) {
             fos.write((old + "\n" + content).getBytes(StandardCharsets.UTF_8));
         }
     }
 
-    @BeforeEach
-    void setup() {
+    @BeforeAll
+    static void setup() {
         remote = initRepository();
         local = cloneRepository();
     }
 
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    static void tearDown() {
         remote.close();
         local.close();
     }
 
-    public void performCommits(List<Unchecked.ThrowingRunnable> commits) {
+    public static void performCommits(List<Unchecked.ThrowingRunnable> commits) {
         IntStream.range(0, commits.size())
             .mapToObj(i -> Map.entry("commit: %s".formatted(i), commits.get(i)))
             .forEach(e -> {
                 uncheck(e.getValue()).run();
                 uncheck(commitState).accept(e.getKey());
             });
-    }
-
-    public File createFile(String name) throws IOException {
-        File file = new File(local.getRepository()
-                                 .getWorkTree()
-                                 .getCanonicalPath(), name
-        );
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            throw new IllegalStateException();
-        }
-        return file;
     }
 }

@@ -1,28 +1,69 @@
 package dev.lfb0801.pqm.service;
 
-import static java.util.Comparator.comparing;
+import static java.util.stream.IntStream.range;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import java.util.Comparator;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import dev.lfb0801.pqm.config.PqmConfiguration;
-import dev.lfb0801.pqm.domain.Aggregate;
+import dev.lfb0801.pqm.util.Unchecked;
 
-@SpringBootTest(classes = PqmConfiguration.class, properties = "quality.target.path=/Users/lloydvanzaalen/School/ProjectQualityMeasurement/.git")
-class AggregateServiceTest {
+@SpringBootTest(classes = PqmConfiguration.class)
+class AggregateServiceTest extends GitFSEnvironment {
+
+    private static Path tempRepoPath;
 
     @Autowired
     private AggregateService aggregateService;
 
+    @DynamicPropertySource
+    static void registerProperties(DynamicPropertyRegistry registry) {
+        setup(); // initializes GitFSEnvironment (remote + local)
+
+        tempRepoPath = local.getRepository()
+            .getWorkTree()
+            .toPath();
+
+        performCommits(range(0, 5)//
+                           .mapToObj(i -> (Unchecked.ThrowingRunnable) () -> {
+                               for (int j = 0; j < 2; j++) {
+                                   String className = "Class" + j + ".java";
+                                   String packageName = "com/example/module" + i;
+                                   String path = "src/main/java/" + packageName + "/" + className;
+                                   appendToFile(path, generateFakeJavaClass(className, i, j));
+                               }
+                           })
+                           .toList());
+
+        registry.add("quality.target.path", () -> tempRepoPath.toString());
+    }
+
+    private static String generateFakeJavaClass(String className, int module, int index) {
+        return """
+            package com.example.module%d;
+            
+            public class %s {
+                public void doSomething() {
+                    System.out.println("Hello from %s #%d");
+                }
+            }
+            """.formatted(module, className.replace(".java", ""), className.replace(".java", ""), index);
+    }
+
     @Test
     void testAggregateService() throws IOException {
         var result = aggregateService.aggregate();
-        result.stream()
-            .sorted(comparing(Aggregate::commits))
-            .forEach(System.out::println);
+
+        assertThat(result)//
+            .allMatch(a -> a.locSrc() == 6)
+            .allMatch(a -> a.commits() == 1);
     }
 }

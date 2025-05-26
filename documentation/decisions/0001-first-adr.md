@@ -1,20 +1,29 @@
-# ADR 001: Use Structurizr for Documentation
+# Use Structurizr for Documentation
 
 ## Status
+
 Accepted
 
 ## Context
-We treat documentation as code and want architecture-centric documentation that stays in sync with implementation. Structurizr models system elements and their relationships, and can embed ADRs directly into those models. By linking ADRs and narrative docs to live architecture diagrams, reviewers gain immediate visual context. Encouraging updates on every merge request helps keep docs aligned with reality.
+
+We treat documentation as code and want architecture-centric documentation that stays in sync with implementation.
+Structurizr models system elements and their relationships, and can embed ADRs directly into those models. By linking
+ADRs and narrative docs to live architecture diagrams, reviewers gain immediate visual context. Encouraging updates on
+every merge request helps keep docs aligned with reality.
 
 ## Decision
-Adopt Structurizr as our primary Documentation-as-Code tool, integrating ADRs and narrative documentation into Structurizr models.
+
+Adopt Structurizr as our primary Documentation-as-Code tool, integrating ADRs and narrative documentation into
+Structurizr models.
 
 ## Decision Drivers
+
 - **Architecture linkage**: Diagrams and ADRs live in the same model, improving traceability.
 - **Sync with code**: Embedding documentation in code repos and CI pipelines encourages updates on merges.
 - **Reader comprehension**: Visual context reduces cognitive load and accelerates onboarding.
 
 ## Considered Alternatives
+
 - **Plain Markdown + static diagrams**
     - Pros: Low overhead, no new tooling.
     - Cons: Diagrams age out of sync; no live linkage to ADRs or code.
@@ -27,14 +36,15 @@ Adopt Structurizr as our primary Documentation-as-Code tool, integrating ADRs an
 
 ## Pros and Cons
 
-| Pros                                                          | Cons                                           |
-|---------------------------------------------------------------|------------------------------------------------|
-| Live, interactive architecture diagrams                       | Learning curve for Structurizr DSL/API         |
-| ADRs and docs linked directly to model elements               | Requires CI/CD integration work                |
-| Encourages documentation updates alongside code changes       | Dependency on a hosted Structurizr service     |
-| Improves reader comprehension with visual context             | Potential licensing cost                       |
+| Pros                                                    | Cons                                       |
+|---------------------------------------------------------|--------------------------------------------|
+| Live, interactive architecture diagrams                 | Learning curve for Structurizr DSL/API     |
+| ADRs and docs linked directly to model elements         | Requires CI/CD integration work            |
+| Encourages documentation updates alongside code changes | Dependency on a hosted Structurizr service |
+| Improves reader comprehension with visual context       | Potential licensing cost                   |
 
 ## Consequences
+
 - **Positive**
     - Documentation remains up-to-date and contextually rich.
     - ADRs become discoverable via architecture views.

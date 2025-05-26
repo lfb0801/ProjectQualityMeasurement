@@ -71,6 +71,8 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             frontend -> diffScanner "ask for comparison of 2 git tags"
             backend -> database "persists in"
 
+            !docs docs/parts
+
             tags internal
         }
 

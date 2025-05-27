@@ -5,9 +5,11 @@ const path = require('path');
 const IGNORE_HTTPS_ERRORS = true;
 const HEADLESS = true;
 
+const baseUrl = 'http://localhost:9797'
+
 const urls = new Map([
-  ['overview', 'http://localhost:9797'],
-  ['documentation', 'http://localhost:9797/workspace/documentation/Project%20Quality%20Measurement']
+  ['overview', ''],
+  ['documentation', '/workspace/documentation/Project%20Quality%20Measurement']
 ]);
 
 (async () => {
@@ -25,8 +27,8 @@ const urls = new Map([
   for (const [title, url] of urls.entries()) {
     const page = await browser.newPage();
 
-    console.log(` - Opening ${url}`);
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    console.log(` - Opening ${baseUrl}${url}`);
+    await page.goto(baseUrl+url, { waitUntil: 'domcontentloaded' });
 
     await page.waitForFunction('structurizr.scripting && structurizr.scripting.isDocumentationRendered() === true');
 

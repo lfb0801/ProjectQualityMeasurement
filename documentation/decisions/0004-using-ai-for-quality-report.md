@@ -1,0 +1,48 @@
+# Using AI for Quality Report
+
+## Status
+
+Proposed
+
+## Context
+
+The project aims to analyze codebases that are too large for developers to manually assess quality issues. As it is very
+difficult to determine the quality of such large codebases, we need to leverage AI to generate a quality report that
+highlights key issues and trends.
+
+Without AI assistance, the quality report may be too generic or not sufficiently detailed to provide actionable
+insights. AI can help in identifying patterns, anomalies, and trends that might not be immediately obvious through
+manual analysis.
+
+## Decision
+
+We will output all findings from the analysis phase into a data structure that can be easily consumed by an AI model. We
+can then try to use an AI model to generate a quality report based on this data structure. The AI will be tasked with:
+
+- Summarizing key findings from the analysis
+- Identifying trends and patterns in the data
+- Highlighting areas of concern or improvement
+- Providing actionable recommendations based on the analysis
+- Generating a human-readable report that can be easily understood by developers and stakeholders
+- Ensuring the report is tailored to the specific codebase and its historical context
+- Incorporating any additional context or metadata that may be relevant to the analysis
+
+### Decision Drivers
+
+- **Enabling AI**: The goal of the project is to find quality issues that developers cannot find themselves. The power
+  of AI is in pattern recognition and anomaly detection, which can help identify issues that are not immediately
+  obvious.
+
+## Consequences
+
+### Positive
+
+- ✅AI analysis could be better than any formula that we could come up with ourselves, as it can leverage
+  vast amounts of data and learn from patterns across multiple codebases.
+
+### Negative
+
+- ❌ AI is inherently unpredictable, and the quality of the report may vary based on the model's training and
+  capabilities.
+- ❌ Need to export the analysis data into a format that can be consumed by the AI model, which may require additional
+  work.

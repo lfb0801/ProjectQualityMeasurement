@@ -33,38 +33,12 @@ public class GitScanner {
 		this.git = git;
 	}
 
-	private DiffFormatter getDiffFormatter(Repository repo) {
-		var diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE);
-		diffFormatter.setRepository(repo);
-		diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-		diffFormatter.setDetectRenames(true);
-		return diffFormatter;
-	}
-
-	private AbstractTreeIterator getNewIterator(RevCommit commit, Repository repo) throws IOException {
-		var newTreeIter = new CanonicalTreeParser();
-		newTreeIter.reset(repo.newObjectReader(), commit.getTree());
-		return newTreeIter;
-	}
-
-	private AbstractTreeIterator getOldTreeIterator(RevCommit commit, RevWalk revWalk, Repository repo) throws IOException {
-		if (commit.getParentCount() > 0) {
-			var parent = revWalk.parseCommit(commit.getParent(0)
-					.getId());
-			var parentTreeIter = new CanonicalTreeParser();
-			parentTreeIter.reset(repo.newObjectReader(), parent.getTree());
-			return parentTreeIter;
-		} else {
-			return new EmptyTreeIterator();
-		}
-	}
-
 	public Set<String> getFilesInRepository() throws IOException {
 		var repo = git.getRepository();
 
 		var headId = repo.resolve(Constants.HEAD);
 		try (var revWalk = new RevWalk(git.getRepository())) {
-			return getFilesInCommit(revWalk.parseCommit(headId)
+			return listFilesInCommit(revWalk.parseCommit(headId)
 					.getTree()
 					.getId());
 		}
@@ -76,12 +50,12 @@ public class GitScanner {
 				.add(repo.resolve("HEAD"))
 				.call();
 
-		try (var revWalk = new RevWalk(repo); var diffFormatter = getDiffFormatter(repo)) {
+		try (var revWalk = new RevWalk(repo); var diffFormatter = diffFormatter(repo)) {
 
 			return stream(commits.spliterator(), false) //
 					.flatMap(suppress().wrap(commit -> {
-						final var newTreeIter = getNewIterator(commit, repo);
-						final var oldTreeIter = getOldTreeIterator(commit, revWalk, repo);
+						final var newTreeIter = currentTreeIterator(commit, repo);
+						final var oldTreeIter = previousTreeIterator(commit, revWalk, repo);
 
 						return diffFormatter.scan(oldTreeIter, newTreeIter)
 								.stream()
@@ -94,7 +68,33 @@ public class GitScanner {
 		}
 	}
 
-	private Set<String> getFilesInCommit(ObjectId id) throws IOException {
+	private DiffFormatter diffFormatter(Repository repo) {
+		var diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE);
+		diffFormatter.setRepository(repo);
+		diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+		diffFormatter.setDetectRenames(true);
+		return diffFormatter;
+	}
+
+	private AbstractTreeIterator currentTreeIterator(RevCommit commit, Repository repo) throws IOException {
+		var newTreeIter = new CanonicalTreeParser();
+		newTreeIter.reset(repo.newObjectReader(), commit.getTree());
+		return newTreeIter;
+	}
+
+	private AbstractTreeIterator previousTreeIterator(RevCommit commit, RevWalk revWalk, Repository repo) throws IOException {
+		if (commit.getParentCount() > 0) {
+			var parent = revWalk.parseCommit(commit.getParent(0)
+					.getId());
+			var parentTreeIter = new CanonicalTreeParser();
+			parentTreeIter.reset(repo.newObjectReader(), parent.getTree());
+			return parentTreeIter;
+		} else {
+			return new EmptyTreeIterator();
+		}
+	}
+
+	private Set<String> listFilesInCommit(ObjectId id) throws IOException {
 		try (var tw = new TreeWalk(git.getRepository())) {
 			tw.addTree(id);
 			tw.setRecursive(true);

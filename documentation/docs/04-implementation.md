@@ -1,13 +1,18 @@
 ## Overview
 
+I take a similar approach to CodeScene, but make some different decisions that hopefully match better with the project
+I've been tasked to investigate.
+
+![](https://codescene.com/hubfs/New%20Website/illustrations/Code%20Health_%20an%20aggregated%20metric%20based%20on%2025%20factors.svg)
+
+Where CodeScene uses a lot of Clean Code concepts to determine the health of the code, I mostly focus on the behavioral
+interaction of the developers with the codebase.
+But we do take a similar approach in architecture.
+
+So we will use multiple scanners and aggregate the results into a single object that can be used to determine the
+quality of the codebase.
+
 ![](embed:container-pqm)
-
-In the above image I show the containers that are relevant for my project.
-It's important to note that SonarQube is listed as external, but it can also run locally.
-
-> **NOTE** The another notable thing is that the User can technically still commit to the repository, as this is a local
-> clone of their codebase. It could become a feature where, when this happens, the analysis is automatically performed
-> against the last Tag.
 
 ## Implementation
 
@@ -56,14 +61,6 @@ This is only a cherry on the cake for my project, as it is mostly concerned the 
 
 ### Aggregate
 
-In the aggregate we determine the flow of our application, here we determine the behaviour/interaction with the different scanners.
-
-#### Similar idea to CodeScene
-
-In the image below we see the behavior that CodeScene uses to determine the "code health", which is a similar concept to my quality. In which we can find that they use Clean Code
-concepts to explain why a file might be classed as good or bad and then match that against behavioral measurements to come to their healthy or not verdict.
-
-![](https://codescene.com/hubfs/New%20Website/illustrations/Code%20Health_%20an%20aggregated%20metric%20based%20on%2025%20factors.svg)
-
-In this project we take a similar approach, but we mostly ignore any Clean Code based measurements and mostly (only) focus on behavioral knowledge. Reasoning for this can be found
-in this [ADR](decision/#4)
+In the aggregate we determine the flow of our application, here we determine the behaviour/interaction with the
+different scanners.
+Then we take the resulting aggregate object and transform it for consumers of the aggregates.

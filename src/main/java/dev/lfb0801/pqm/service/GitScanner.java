@@ -2,11 +2,11 @@ package dev.lfb0801.pqm.service;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
@@ -17,84 +17,99 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static dev.lfb0801.pqm.Unchecked.Errors.suppress;
+import static java.util.stream.StreamSupport.stream;
 
 @Service
 public class GitScanner {
 
-    public final Git git;
+	private final Git git;
 
-    public GitScanner(Git git) {
-        this.git = git;
-    }
+	public GitScanner(Git git) {
+		this.git = git;
+	}
 
-    public Set<String> getFilesInRepository() throws IOException {
-        var repo = git.getRepository();
+	private DiffFormatter getDiffFormatter(Repository repo) {
+		var diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE);
+		diffFormatter.setRepository(repo);
+		diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+		diffFormatter.setDetectRenames(true);
+		return diffFormatter;
+	}
 
-        var headId = repo.resolve(Constants.HEAD);
-        try (var revWalk = new RevWalk(git.getRepository())) {
-            return getFilesInCommit(revWalk.parseCommit(headId)
-                                           .getTree()
-                                           .getId());
-        }
-    }
+	private AbstractTreeIterator getNewIterator(RevCommit commit, Repository repo) throws IOException {
+		var newTreeIter = new CanonicalTreeParser();
+		newTreeIter.reset(repo.newObjectReader(), commit.getTree());
+		return newTreeIter;
+	}
 
-    public Map.Entry<String, Set<String>> getCommitsContainingFile(String file) throws GitAPIException, IOException {
-        Set<String> fileCommits = new HashSet<>();
+	private AbstractTreeIterator getOldTreeIterator(RevCommit commit, RevWalk revWalk, Repository repo) throws IOException {
+		if (commit.getParentCount() > 0) {
+			var parent = revWalk.parseCommit(commit.getParent(0)
+					.getId());
+			var parentTreeIter = new CanonicalTreeParser();
+			parentTreeIter.reset(repo.newObjectReader(), parent.getTree());
+			return parentTreeIter;
+		} else {
+			return new EmptyTreeIterator();
+		}
+	}
 
-        var repo = git.getRepository();
-        var commits = git.log()
-                         .add(repo.resolve("HEAD"))
-                         .call();
+	public Set<String> getFilesInRepository() throws IOException {
+		var repo = git.getRepository();
 
-        try (RevWalk revWalk = new RevWalk(repo);
-             DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
+		var headId = repo.resolve(Constants.HEAD);
+		try (var revWalk = new RevWalk(git.getRepository())) {
+			return getFilesInCommit(revWalk.parseCommit(headId)
+					.getTree()
+					.getId());
+		}
+	}
 
-            diffFormatter.setRepository(repo);
-            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-            diffFormatter.setDetectRenames(true);
+	public Set<String> getCommitsContainingFile(String file) throws GitAPIException, IOException {
+		final var repo = git.getRepository();
+		final var commits = git.log()
+				.add(repo.resolve("HEAD"))
+				.call();
 
-            for (RevCommit commit : commits) {
-                AbstractTreeIterator oldTreeIter;
-                CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-                newTreeIter.reset(repo.newObjectReader(), commit.getTree());
+		try (var revWalk = new RevWalk(repo); var diffFormatter = getDiffFormatter(repo)) {
 
-                if (commit.getParentCount() > 0) {
-                    RevCommit parent = revWalk.parseCommit(commit.getParent(0)
-                                                                 .getId());
-                    CanonicalTreeParser parentTreeIter = new CanonicalTreeParser();
-                    parentTreeIter.reset(repo.newObjectReader(), parent.getTree());
-                    oldTreeIter = parentTreeIter;
-                } else {
-                    oldTreeIter = new EmptyTreeIterator();
-                }
+			return stream(commits.spliterator(), false) //
+					.flatMap(suppress().wrap(commit -> {
+						final var newTreeIter = getNewIterator(commit, repo);
+						final var oldTreeIter = getOldTreeIterator(commit, revWalk, repo);
 
-                List<DiffEntry> diffs = diffFormatter.scan(oldTreeIter, newTreeIter);
+						return diffFormatter.scan(oldTreeIter, newTreeIter)
+								.stream()
+								.filter(diff -> diff.getNewPath()
+										                .equals(file) || diff.getOldPath()
+										                .equals(file))
+								.map($ -> commit.name());
+					}))
+					.collect(Collectors.toSet());
+		}
+	}
 
-                for (DiffEntry diff : diffs) {
-                    if (file.equals(diff.getNewPath()) || file.equals(diff.getOldPath())) {
-                        fileCommits.add(commit.name());
-                        break;
-                    }
-                }
-            }
-        }
+	private Set<String> getFilesInCommit(ObjectId id) throws IOException {
+		try (var tw = new TreeWalk(git.getRepository())) {
+			tw.addTree(id);
+			tw.setRecursive(true);
 
-        return Map.entry(file, fileCommits);
-    }
-
-    private Set<String> getFilesInCommit(ObjectId id) throws IOException {
-        Set<String> committed = new HashSet<>();
-        try (TreeWalk tw = new TreeWalk(git.getRepository())) {
-            tw.addTree(id);
-            tw.setRecursive(true);
-            while (tw.next()) {
-                committed.add(tw.getPathString());
-            }
-            return committed;
-        }
-    }
+			return Optional.of(tw)
+					.stream()
+					.takeWhile(treeWalk -> {
+						try {
+							return treeWalk.next();
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					})
+					.map(TreeWalk::getPathString)
+					.collect(Collectors.toSet());
+		}
+	}
 }

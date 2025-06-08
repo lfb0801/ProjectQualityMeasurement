@@ -39,6 +39,10 @@ can then try to use an AI model to generate a quality report based on this data 
 
 - ✅AI analysis could be better than any formula that we could come up with ourselves, as it can leverage
   vast amounts of data and learn from patterns across multiple codebases.
+- ✅AI can theoretically improve over time as it learns from more data, leading to increasingly accurate and insightful
+  reports.
+- ✅We can use Spring-AI, which is a Spring Boot library that provides a simple way to integrate AI models into Spring
+  applications, making it easier to implement and maintain the AI analysis component.
 
 ### Negative
 

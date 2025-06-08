@@ -1,8 +1,8 @@
-## Project Quality Measurement
+## Goal definition
 
-In this diagram you can see how the application is structured
-
-In the below image I show a Context diagram of my Project Quality Measurement tool.
 This tool should function as an additional component next to a company's pre-existing quality measurement devices.
+This project tries to get an idea of the quality of a given application.
+
 ![](embed:pqm)
 
+In this diagram you can see how the application is structured.

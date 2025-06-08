@@ -1,8 +1,7 @@
 ## Context
 
-This project tries to get an idea of the quality of a given application.
-
-I take a similar approach to CodeScene, but make some different decisions that hopefully match better with the project
-I've been tasked to investigate.
+The project does not make any changes to the codebase, but rather collects data from it.
 
 ![](embed:context-targetProject)
+
+> **IMPORTANT:** The codebase is never sent to the aiModel component, only the data that is collected from the codebase.

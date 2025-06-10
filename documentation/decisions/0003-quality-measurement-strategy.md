@@ -66,7 +66,7 @@ We will use JGit to analyze the evolution of a repository over time, focusing on
 
 ### Feature Matrix
 
-| Criterion                         | CodeScene                              | SonarQube                                     | CodeClimate                             |
+| Criteria                          | CodeScene                              | SonarQube                                     | CodeClimate                             |
 |-----------------------------------|----------------------------------------|-----------------------------------------------|-----------------------------------------|
 | Static Analysis & Rule Coverage   | Moderate set; custom rules via plugin  | Extensive rule sets (1000+); language support | Good core rules; limited security rules |
 | Maintainability & Technical Debt  | Advanced debt estimation; XY metric    | Strong debt calculation; SQALE method         | Basic Maintainability score             |
@@ -94,4 +94,3 @@ resolving root causes or merely applying superficial fixes to satisfy static-ana
 highlighting long‑lived hotspots and patterns of “quick fixes,” our tool encourages teams to prioritize genuine
 architectural improvements over tactical workarounds, fostering sustainable code health and guiding strategic
 refactoring initiatives.
-

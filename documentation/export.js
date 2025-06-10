@@ -8,8 +8,7 @@ const HEADLESS = true;
 const baseUrl = 'http://localhost:9797'
 
 const urls = new Map([
-  ['overview', ''],
-   ['adr1', '/workspace/decisions#1']
+  ['overview', '']
 ]);
 
 (async () => {

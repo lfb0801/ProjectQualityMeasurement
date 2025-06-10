@@ -34,7 +34,7 @@ but that we should view churn on modules as an important metric for determining 
 
 This implementation shows how I can use the LOCC4J library to make the distinction between Source and Test code
 
-![](./images/LoCScannerImpl.png)
+![](../images/LoCScannerImpl.png)
 
 ### GitScanner (JGit)
 
@@ -47,7 +47,7 @@ This is important as running my analysis on every build/commit would be expensiv
 The JGit library allows us to create any complex Git-operation.
 Using the following methods we can figure out how often a commit contained the given file.
 
-![](./images/countCommitsImpl1.png)
+![](../images/countCommitsImpl1.png)
 
 This will allow us to figure out how often people edit the given file, which is potentially a bad sign.
 

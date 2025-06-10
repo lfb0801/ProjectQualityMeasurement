@@ -19,46 +19,45 @@ import static dev.lfb0801.pqm.domain.Aggregate.build;
 @Service
 public class AggregateService {
 
-    private final LOCScanner locScanner;
-    private final GitScanner gitScanner;
-    private final Git git;
+	private final LOCScanner locScanner;
+	private final GitScanner gitScanner;
+	private final Git git;
 
-    public AggregateService(LOCScanner locScanner, GitScanner gitScanner, Git git) {
-        this.locScanner = locScanner;
-        this.gitScanner = gitScanner;
-        this.git = git;
-    }
+	public AggregateService(LOCScanner locScanner, GitScanner gitScanner, Git git) {
+		this.locScanner = locScanner;
+		this.gitScanner = gitScanner;
+		this.git = git;
+	}
 
-    public Set<Aggregate> aggregate() throws IOException {
-        Set<String> files = gitScanner.getFilesInRepository();
-        var sources = locScanner.scanSources();
-        var tests = locScanner.scanTests();
+	public Set<Aggregate> aggregate() throws IOException {
+		Set<String> files = gitScanner.getFilesInRepository();
+		var sources = locScanner.scanSources();
+		var tests = locScanner.scanTests();
 
-        return files.stream()
-                    .map(file -> build(aggregate -> aggregate //
-                                                              .file(file)
-                                                              .locSrc(getLinesOfCodeFor(sources, file))
-                                                              .locTest(getLinesOfCodeFor(tests, file))
-                                                              .commits(getCommits(file))))
-                    .collect(Collectors.toSet());
-    }
+		return files.stream()
+				.map(file -> build(aggregate -> aggregate //
+						.file(file)
+						.locSrc(getLinesOfCodeFor(sources, file))
+						.locTest(getLinesOfCodeFor(tests, file))
+						.commits(getCommits(file))))
+				.collect(Collectors.toSet());
+	}
 
-    private int getCommits(String file) {
-        try {
-            return gitScanner.getCommitsContainingFile(file)
-                             .getValue()
-                             .size();
-        } catch (GitAPIException | IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	private Set<String> getCommits(String file) {
+		try {
+			return gitScanner.getCommitsContainingFile(file);
+		} catch (GitAPIException | IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    private int getLinesOfCodeFor(Map<Path, Counts> scanResult, String file) {
-        return Optional.ofNullable(scanResult.getOrDefault(new File(git.getRepository()
-                                                                       .getWorkTree(), file
-                                                           ).toPath(), null
-                       ))
-                       .map(Counts::getCodeLines)
-                       .orElse(0);
-    }
+	private int getLinesOfCodeFor(Map<Path, Counts> scanResult, String file) {
+		return Optional.ofNullable(scanResult.getOrDefault(//
+						new File(git.getRepository()
+								.getWorkTree(), file
+						).toPath(), null
+				))
+				.map(Counts::getCodeLines)
+				.orElse(0);
+	}
 }

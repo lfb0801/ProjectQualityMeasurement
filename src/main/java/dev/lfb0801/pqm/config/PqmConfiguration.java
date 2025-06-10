@@ -21,39 +21,39 @@ import static java.util.Comparator.reverseOrder;
 @ComponentScan(basePackages = "dev.lfb0801.pqm")
 public class PqmConfiguration {
 
-    private final String targetPath;
+	private final String targetPath;
 
-    public PqmConfiguration(@Value("${quality.target.path}") String targetPath) {
-        this.targetPath = targetPath;
-    }
+	public PqmConfiguration(@Value("${quality.target.path}") String targetPath) {
+		this.targetPath = targetPath;
+	}
 
-    @Bean
-    public Repository repo() throws IOException {
-        Path foo = Path.of(TARGET_PATH.value);
-        if (Files.exists(foo)) {
-            Files.walk(foo)
-                 .sorted(reverseOrder())
-                 .map(Path::toFile)
-                 .forEach(File::delete);
-        }
-        Files.createDirectory(foo);
+	@Bean
+	public Repository repo() throws IOException {
+		Path foo = Path.of(TARGET_PATH.value);
+		if (Files.exists(foo)) {
+			Files.walk(foo)
+					.sorted(reverseOrder())
+					.map(Path::toFile)
+					.forEach(File::delete);
+		}
+		Files.createDirectory(foo);
 
-        return new RepositoryBuilder().setWorkTree(new File(foo.toString()))
-                                      .setup()
-                                      .build();
-    }
+		return new RepositoryBuilder().setWorkTree(new File(foo.toString()))
+				.setup()
+				.build();
+	}
 
-    @Bean
-    public Git git(Repository repo) {
-        Git git = new Git(repo);
-        try {
-            Git.cloneRepository()
-               .setURI(targetPath)
-               .setDirectory(repo.getWorkTree())
-               .call();
-        } catch (GitAPIException e) {
-            throw new IllegalArgumentException("Repository should already exist", e);
-        }
-        return git;
-    }
+	@Bean
+	public Git git(Repository repo) {
+		Git git = new Git(repo);
+		try {
+			Git.cloneRepository()
+					.setURI(targetPath)
+					.setDirectory(repo.getWorkTree())
+					.call();
+		} catch (GitAPIException e) {
+			throw new IllegalArgumentException("Repository should already exist", e);
+		}
+		return git;
+	}
 }

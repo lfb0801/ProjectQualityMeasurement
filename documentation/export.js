@@ -8,8 +8,8 @@ const HEADLESS = true;
 const baseUrl = 'http://localhost:9797'
 
 const urls = new Map([
-  ['overview', ''],
-  ['documentation', '/workspace/documentation/Project%20Quality%20Measurement']
+  ['ontwerp', '/workspace/documentation/Project%20Quality%20Measurement'],
+  ['implementatie', '/workspace/documentation/Project%20Quality%20Measurement/Quality%20Measurement%20Server']
 ]);
 
 (async () => {

@@ -9,7 +9,7 @@ const baseUrl = 'http://localhost:9797'
 
 const urls = new Map([
   ['overview', ''],
-  ['documentation', '/workspace/documentation/Project%20Quality%20Measurement']
+   ['adr1', '/workspace/decisions#1']
 ]);
 
 (async () => {

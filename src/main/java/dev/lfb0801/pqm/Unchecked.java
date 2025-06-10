@@ -87,7 +87,7 @@ public interface Unchecked {
 	abstract class Errors implements Consumer<Throwable> {
 
 		protected final Consumer<Throwable> handler;
-		private static final Handling suppress = createHandling(_ -> {
+		private static final Handling suppress = createHandling(ignore -> {
 		});
 		private static final Rethrowing rethrow = createRethrowing(Errors::rethrowErrorAndWrapOthersAsRuntime);
 

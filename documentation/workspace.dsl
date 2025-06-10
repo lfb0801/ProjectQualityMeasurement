@@ -50,14 +50,16 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
 
                 aiReporter -> aiModel "sends aggregates for analysis to"
 
+                !docs docs/impl
                 tags internal api
             }
 
             frontend -> aiReporter "ask for comparison of 2 git tags"
             backend -> database "persists in"
 
-
             tags internal
+
+            !docs docs/design
         }
 
         user -> targetProject "commits and works on"
@@ -66,7 +68,6 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
 
     }
 
-    !docs docs
     !adrs decisions
 
     views {

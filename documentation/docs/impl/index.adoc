@@ -1,20 +1,20 @@
-## Overview
+== Overview
 
 I take a similar approach to CodeScene, but make some different decisions that hopefully match better with the project
 I've been tasked to investigate.
 
-![](https://codescene.com/hubfs/New%20Website/illustrations/Code%20Health_%20an%20aggregated%20metric%20based%20on%2025%20factors.svg)
+image::https://codescene.com/hubfs/New%20Website/illustrations/Code%20Health_%20an%20aggregated%20metric%20based%20on%2025%20factors.svg[]
 
-Where CodeScene uses a lot of Clean Code concepts to determine the health of the code, I mostly focus on the behavioral
+Where CodeScene uses a lot of Clean Code concepts to determine the health of the code, I mostly focus on the behavioural
 interaction of the developers with the codebase.
 But we do take a similar approach in architecture.
 
 So we will use multiple scanners and aggregate the results into a single object that can be used to determine the
 quality of the codebase.
 
-![](embed:container-pqm)
+image::embed:container-pqm[]
 
-## Implementation
+== Implementation
 
 In the following image I show the components that constitute the PQM-Server (Backend of the project).
 The most important component in the `PQM-Server`, which is responsible for the analysis of the project, is the
@@ -22,7 +22,7 @@ The most important component in the `PQM-Server`, which is responsible for the a
 
 ![](embed:backend-component)
 
-### LOCScanner (LOCC4J)
+=== LOCScanner (LOCC4J)
 
 I am able to make detailed scans over the content of source files.
 Thanks to the [LOCC4J](https://github.com/cthing/locc4j) library.
@@ -36,30 +36,17 @@ This implementation shows how I can use the LOCC4J library to make the distincti
 
 ![](../images/LoCScannerImpl.png)
 
-### GitScanner (JGit)
+include::specific/01-gitscanner.adoc[]
 
-Thanks to [JGit](https://github.com/eclipse-jgit/jgit?tab=readme-ov-file#java-git) I am able to interact with the VCS of
-the given project and analyze the behavior of the developers inside the project.
+=== SonarQube (Not implemented)
 
-It also allows me to increase the interval of analysis.
-This is important as running my analysis on every build/commit would be expensive and wouldn't align with my research.
-
-The JGit library allows us to create any complex Git-operation.
-Using the following methods we can figure out how often a commit contained the given file.
-
-![](../images/countCommitsImpl1.png)
-
-This will allow us to figure out how often people edit the given file, which is potentially a bad sign.
-
-### SonarQube (Not implemented)
-
-In this project I use a local version of SonarQube, but normally I would expect a company to have already setup their
+In this project I use a local version of SonarQube, but normally I would expect a company to have already set up their
 own SonarQube instance somewhere.
 
 The reason I'm using SonarQube, is to make it do the Static Code Analysis.
 This is only a cherry on the cake for my project, as it is mostly concerned the [JGit](#JGit) analysis
 
-### Aggregate
+=== Aggregate
 
 In the aggregate we determine the flow of our application, here we determine the behaviour/interaction with the
 different scanners.

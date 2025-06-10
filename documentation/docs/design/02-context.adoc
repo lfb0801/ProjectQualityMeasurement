@@ -1,0 +1,11 @@
+== Context
+
+The project does not make any changes to the codebase, but rather collects data from it.
+
+image:embed:context-targetProject[]
+
+____
+
+*IMPORTANT:* The codebase is never sent to the aiModel component, only the data that is collected from the codebase.
+
+____

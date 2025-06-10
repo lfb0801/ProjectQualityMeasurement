@@ -1,8 +1,8 @@
-## Goal definition
+== Goal definition
 
 This tool should function as an additional component next to a company's pre-existing quality measurement devices.
 This project tries to get an idea of the quality of a given application.
 
-![](embed:pqm)
+image:embed:pqm[]
 
 In this diagram you can see how the application is structured.

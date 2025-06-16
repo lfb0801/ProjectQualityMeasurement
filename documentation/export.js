@@ -35,9 +35,15 @@ const urls = new Map([
     console.log(` - Opening ${baseUrl}${url}`);
     await page.goto(baseUrl + url, {waitUntil: 'domcontentloaded'});
 
-    await page.waitForFunction(
-        'structurizr.scripting && structurizr.scripting.isDocumentationRendered() === true');
-
+    try {
+      await page.waitForFunction(
+          'structurizr.scripting && structurizr.scripting.isDocumentationRendered() === true',
+          { timeout: 60000 }
+      );
+    } catch (error) {
+      console.error(`Failed to render documentation for ${title}:`, error);
+      continue; // Skip to the next URL in the loop
+    }
     const outputPath = path.join(outputDir, `${title}.pdf`);
 
     console.log(` - Generating PDF for ${title}...`);

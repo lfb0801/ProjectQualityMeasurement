@@ -8,7 +8,7 @@ const HEADLESS = true;
 const baseUrl = 'http://localhost:9797'
 
 const urls = new Map([
-  ['ontwerp', '/workspace/documentation/Project%20Quality%20Measurement'],
+  ['ontwerp', ''],
   ['implementatie', '/workspace/documentation/Project%20Quality%20Measurement/Quality%20Measurement%20Server'],
   ['Research-on-Churn', '/workspace/documentation/research/research%20on%20Churn'],
   ['Literature-study', '/workspace/documentation/research/Literature%20study'],

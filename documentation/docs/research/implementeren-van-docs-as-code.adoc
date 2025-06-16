@@ -6,7 +6,81 @@ Om aan de gewenste ontwerp te voldoen, heb ik verschillende oplossingen moeten m
 
 [source, yml]
 ----
-include::../../../.github/workflows/generate-docs.yml[]
+name: Generate Structurizr Docs
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Puppeteer dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libxss1 \
+            libgtk-3-0 \
+            libgbm1 \
+            libasound2t64 \
+            libxshmfence1 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2
+          npm install puppeteer cheerio
+          npx puppeteer browsers install chromium@latest
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+          cache: maven
+
+      - name: First build project
+        run : mvn package
+
+      - name: Setup Docker Compose
+        uses: docker/setup-compose-action@v1
+        with:
+          version: latest
+
+      - name: Start structurizr
+        run: docker compose --profile docs up -d
+
+      - name: Wait for Structurizr to be ready
+        run: |
+          echo "Waiting for Structurizr UI on port 9797..."
+          for i in {1..30}; do
+            if curl -s http://localhost:9797/ > /dev/null; then
+              echo "Structurizr UI is up."
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Run Structurizr export script
+        run: node ./documentation/export.js
+
+      - name: Upload static site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: structurizr-docs
+          path: ./documentation/output
 ----
 
 Belangrijk hiervoor zijn 2 verschillende punten:
@@ -20,7 +94,25 @@ Omdat ik de volgende plugin heb moeten schrijven om `.adoc` files te kunnen voor
 
 [source, java]
 ----
-include::../../../structurizr-plugins/src/main/java/dev/lfb0801/AsciiDocAdrImporter.java[]
+	@Override
+	public void importDocumentation(Documentable documentable, File path) {
+        super.importDocumentation(documentable, path);
+
+        Optional.ofNullable(path.listFiles((dir, name) -> name.endsWith(".adoc")))
+                .stream()
+                .flatMap(Arrays::stream)
+                .forEach(file -> {
+                    Decision decision = null;
+                    try {
+                        decision = this.importDecision(file);
+                        documentable.getDocumentation()
+                                .addDecision(decision);
+                    } catch (Exception e) {
+                        throw new DocumentationImportException(e);
+                    }
+                });
+		}
+	}
 ----
 
 In deze file, maken we een nieuwe implementatie van `AdrToolsDecisionImporter`, wat er voor zorgt dat decisions, nu ook d.m.v. `.adoc` files aangeleverd kunnen worden.
@@ -37,5 +129,37 @@ In dit laatste script worden 2 dingen gedaan:
 
 [source, js]
 ----
-include::../../export.js[]
+  for (const [title, url] of urls.entries()) {
+    const page = await browser.newPage();
+
+    console.log(` - Opening ${baseUrl}${url}`);
+    await page.goto(baseUrl + url, {waitUntil: 'domcontentloaded'});
+
+    try {
+      await page.waitForFunction(
+          'structurizr.scripting && structurizr.scripting.isDocumentationRendered() === true',
+          { timeout: 60000 }
+      );
+    } catch (error) {
+      console.error(`Failed to render documentation for ${title}:`, error);
+      continue; // Skip to the next URL in the loop
+    }
+    const outputPath = path.join(outputDir, `${title}.pdf`);
+
+    console.log(` - Generating PDF for ${title}...`);
+    await page.pdf({
+      path: outputPath,
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '20mm',
+        bottom: '20mm',
+        left: '15mm',
+        right: '15mm'
+      }
+    });
+
+    console.log(` - PDF written to ${outputPath}`);
+    await page.close();
+  }
 ----

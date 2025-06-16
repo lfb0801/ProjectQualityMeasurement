@@ -1,0 +1,58 @@
+# Kunnen we een kwaliteitsmeting/oordeel over de code maken zonder tegen Goodhart's law aan te lopen?
+
+Goodhart's law is an adage that has been stated as, "When a measure becomes a target, it ceases to be a good measure".
+
+## Expert interview
+
+Omdat ik mij zorgen maakte over Goodhart's law en/of gamefication van mijn kwaliteit meting heb ik contact opgenomen met Adam Tornhill. Adam is Founder & CTO van CodeScene de tool die we eerder in <link> hebben bekeken.
+Adam heeft meerdere talks gegeven over de manieren hoe CodeScene metrics combineert om een beter beeld te geven van de code.
+Mijn grote vraag aan hem was, of CodeScene rekening houdt met het Sonar ontwijkende gedrag, wat ik eerder al heb omschreven.
+Hieronder volgt een korte snapshot van ons gesprek:
+
+### Quick Question on Detecting “Sonar Avoidant Behaviour” – Would Love Your Thoughts
+
+Hi Adam,
+
+I recently started as a platform engineer at my current company, with a focus on improving Developer Experience, Cost of Change, and Ease of Change. My goal is to boost productivity while genuinely making life easier for our devs.
+
+In that spirit, I’ve been exploring ways to demonstrate the kind of value CodeScene brings—even before trying to pitch a license internally.
+
+I’m reaching out to you directly (rather than CodeScene support), because I have a broader question that I suspect CodeScene doesn’t fully address yet—and one that really ties into the heart of developer behavior and long-term code quality.
+
+At our company, we use SonarQube to enforce static quality gates. It works to an extent, but I’ve noticed a pattern: once developers are flagged by Sonar, they often do the bare minimum to “pass” the check, rather than rethinking their implementation. I’ve been calling this “Sonar avoidant behaviour.” (Happy to share examples if that’s helpful.)
+
+My question is:
+Is there any way that CodeScene can help detect this kind of avoidant behavior, or am I right in thinking that once code just barely meets initial review/quality gate standards, these patterns often slip through undetected?
+
+And if this is detectable—either through CodeScene or other means—how would you suggest I go about tackling it?
+
+I really appreciate your time, and I know you’re incredibly busy. But I’d love to get your thoughts if this sparks anything for you.
+
+Kind regards,
+Lloyd van Zaalen
+
+### Response by Adam Tornhill
+
+Hi Lloyd,
+
+That's a very interesting question, and I'm not sure I have the perfect answer. To some extent, you can game any tool or metric.
+
+CodeScene's gates are based on the Code Health metric. I know that other vendors have started to talk about "code health", which unfortunately blurs the concept. The main difference is that ours is an actual metric based on research and validated on real code.
+
+My experience is that the Code Health measure is harder to "game" since it's more about design and structure of the code, rather than line-by-line findings. So I've seen some impressive uptake and actions by organizations using it.
+
+Personally, I have made it a habit to review both ignored and fixed issues in the quality gates. I learn a lot by approaching reviews from that angle.
+
+I have a brief slide that tries to explain the difference:
+Let me know if this helps.
+
+Best,
+Adam
+
+## Reflectie
+
+Uit zijn reactie haal ik het volgende:
+
+> To some extent, you can game any tool or metric, but a Code Health measure is harder to "game" since it's more about design and structure of the code
+
+Ik zal in mijn kwaliteitsmeting een vergelijkbare approach moeten hebben, als hoe CodeScene code health meet, mijn meting moet kijken naar gedrag en structuur en niet naar line-by-line metingen.

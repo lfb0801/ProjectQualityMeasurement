@@ -25,7 +25,6 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             backend = container "Quality Measurement Server" "Creates several metrics based on the target project" "java/spring" {
 
                 gitScanner = component "Git scanner" "This component can perform git operations on a clone of the target project" {
-                    !docs docs/impl/specific/01-gitscanner.adoc
                     tags internal component
                 }
 
@@ -51,7 +50,7 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
 
                 aiReporter -> aiModel "sends aggregates for analysis to"
 
-                !docs docs/impl/index.adoc
+                !docs docs/components
                 tags internal api
             }
 
@@ -67,6 +66,23 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
         user -> pqm "uses"
         user -> frontend "Interacts with"
 
+        research = softwareSystem "research" {
+            container "research on Churn" {
+                !docs docs/research/are-we-close-to-15%-resultaat.adoc
+            }
+            container "expert interview" {
+                !docs docs/research/expert-interview.adoc
+            }
+            container "literature study" {
+                !docs docs/research/literature-study.adoc
+            }
+            container "regels code per developer" {
+                !docs docs/research/regels-code-per-developer.adoc
+            }
+            container "scope voor meetpunten" {
+                !docs docs/research/scope-voor-meetpunten.adoc
+            }
+        }
     }
 
     !adrs decisions dev.lfb0801.AsciiDocAdrImporter

@@ -12,20 +12,18 @@ But we do take a similar approach in architecture.
 So we will use multiple scanners and aggregate the results into a single object that can be used to determine the
 quality of the codebase.
 
-image::embed:container-pqm[]
-
 == Implementation
 
 In the following image I show the components that constitute the PQM-Server (Backend of the project).
 The most important component in the `PQM-Server`, which is responsible for the analysis of the project, is the
-[Scan Aggregator](#Aggregate).
+link:#_aggregate[Scan Aggregator].
 
-![](embed:backend-component)
+image::embed:backend-component[]
 
 === LOCScanner (LOCC4J)
 
 I am able to make detailed scans over the content of source files.
-Thanks to the [LOCC4J](https://github.com/cthing/locc4j) library.
+Thanks to the link:https://github.com/cthing/locc4j[LOCC4J] library.
 This allows me to ignore blank-lines and comments in my analysis.
 
 Based on the research: [on how many lines of code can a developer maintain](), we learned that it isn't just important
@@ -34,9 +32,23 @@ but that we should view churn on modules as an important metric for determining 
 
 This implementation shows how I can use the LOCC4J library to make the distinction between Source and Test code
 
-![](../images/LoCScannerImpl.png)
+image::../../images/LoCScannerImpl.png[]
 
-include::specific/01-gitscanner.adoc[]
+== GitScanner (JGit)
+
+Thanks to link:https://github.com/eclipse-jgit/jgit?tab=readme-ov-file#java-git[JGit], I am able to interact with the VCS of
+the given project and analyze the behavior of the developers inside the project.
+
+It also allows me to increase the interval of analysis.
+This is important as running my analysis on every build/commit would be expensive and wouldn't align with my research.
+
+The JGit library allows us to create any complex Git-operation.
+Using the following methods we can figure out how often a commit contained the given file.
+
+image::../../images/countCommitsImpl1.png[]
+
+This will allow us to figure out how often people edit the given file, which is potentially a bad sign.
+
 
 === SonarQube (Not implemented)
 

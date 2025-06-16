@@ -2,7 +2,7 @@
 
 The project does not make any changes to the codebase, but rather collects data from it.
 
-image:embed:context-targetProject[]
+image::embed:container-pqm[]
 
 ____
 

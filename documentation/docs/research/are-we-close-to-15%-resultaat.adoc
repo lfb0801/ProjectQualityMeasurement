@@ -1,8 +1,9 @@
-# Match onze churn met dat uit de LT?
+== Match onze churn met dat uit de LT?
 
 Na het draaien van are-we-close-to-15%.sh kreeg ik de volgende uitkomst:
 
-```bash
+[source,bash]
+----
 echo "Lines added and removed in the last year"
 git log --since=31/12/2012 --numstat --pretty="%H" | awk '
     NF==3 {plus+=$1; minus+=$2;}
@@ -12,9 +13,10 @@ echo ""
 
 echo "total lines of code in the application"
 cloc .
-```
+----
 
-```bash
+[source,bash]
+----
 Lines added and removed in the last year
 +1159130, -971277
 
@@ -63,10 +65,10 @@ Bourne Again Shell                      2              3              0         
 --------------------------------------------------------------------------------------
 SUM:                                14342         175466         239059        3256405
 --------------------------------------------------------------------------------------
-```
+----
 
-# Voorlopige conclusie
+=== Voorlopige conclusie
 
 De eerste getallen zouden de hoeveelheid regels moeten zijn die zijn aangepast sinds 31/12/2023.
 Dat is iets meer dan 1 jaar geleden, maar dat zou betekenen dat bijna 2 miljoen regels aangepast zouden zijn in die periode.
-**Dat is bijna 65% van de codebase!**, dit kan niet kloppen, dus dit resultaat lijkt mij incorrect.
+*Dat is bijna 65% van de codebase!*, dit kan niet kloppen, dus dit resultaat lijkt mij incorrect.

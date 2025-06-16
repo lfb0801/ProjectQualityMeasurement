@@ -1,16 +1,17 @@
-# Kunnen we een kwaliteitsmeting/oordeel over de code maken zonder tegen Goodhart's law aan te lopen?
+== Kunnen we een kwaliteitsmeting/oordeel over de code maken zonder tegen Goodhart's law aan te lopen?
 
 Goodhart's law is an adage that has been stated as, "When a measure becomes a target, it ceases to be a good measure".
 
-## Expert interview
+=== Expert interview
 
-Omdat ik mij zorgen maakte over Goodhart's law en/of gamefication van mijn kwaliteit meting heb ik contact opgenomen met Adam Tornhill. Adam is Founder & CTO van CodeScene de tool die we eerder in <link> hebben bekeken.
+Omdat ik mij zorgen maakte over Goodhart's law en/of gamefication van mijn kwaliteit meting heb ik contact opgenomen met Adam Tornhill. Adam is Founder &amp; CTO van CodeScene de tool die we eerder in <link> hebben bekeken.
 Adam heeft meerdere talks gegeven over de manieren hoe CodeScene metrics combineert om een beter beeld te geven van de code.
 Mijn grote vraag aan hem was, of CodeScene rekening houdt met het Sonar ontwijkende gedrag, wat ik eerder al heb omschreven.
 Hieronder volgt een korte snapshot van ons gesprek:
 
-### Quick Question on Detecting “Sonar Avoidant Behaviour” – Would Love Your Thoughts
+==== Quick Question on Detecting “Sonar Avoidant Behaviour” – Would Love Your Thoughts
 
+____
 Hi Adam,
 
 I recently started as a platform engineer at my current company, with a focus on improving Developer Experience, Cost of Change, and Ease of Change. My goal is to boost productivity while genuinely making life easier for our devs.
@@ -30,9 +31,11 @@ I really appreciate your time, and I know you’re incredibly busy. But I’d lo
 
 Kind regards,
 Lloyd van Zaalen
+____
 
-### Response by Adam Tornhill
+==== Response by Adam Tornhill
 
+____
 Hi Lloyd,
 
 That's a very interesting question, and I'm not sure I have the perfect answer. To some extent, you can game any tool or metric.
@@ -48,11 +51,16 @@ Let me know if this helps.
 
 Best,
 Adam
+____
 
-## Reflectie
+=== Reflectie
 
 Uit zijn reactie haal ik het volgende:
 
-> To some extent, you can game any tool or metric, but a Code Health measure is harder to "game" since it's more about design and structure of the code
+____
+
+To some extent, you can game any tool or metric, but a Code Health measure is harder to "game" since it's more about design and structure of the code
+
+____
 
 Ik zal in mijn kwaliteitsmeting een vergelijkbare approach moeten hebben, als hoe CodeScene code health meet, mijn meting moet kijken naar gedrag en structuur en niet naar line-by-line metingen.

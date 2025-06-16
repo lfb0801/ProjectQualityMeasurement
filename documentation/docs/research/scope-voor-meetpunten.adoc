@@ -1,0 +1,35 @@
+== Op welke interval kan mijn kwaliteitsmeeting draaien?
+
+Een korte feedback-loop heeft enorm veel voordelen als het gaat om goeie kwaliteit te leveren.
+Echter moeten we ook realistisch zijn in de gewenste, maar ook de relavante nauwkeurigheid.
+
+De primaire stakeholders van mijn kwaliteitsmeeting, zijn managers die niet op ieder kleine verandering willen weten.
+Voor hun is het relevant om op een reguliere interval te kunnen kijken, om op die manier een trend te analyseren.
+
+=== Per commit / Per release
+
+Ongeacht de kosten van het draaien van de kwaliteitsmeeting leken mij 2 frequencies logisch om naar te kijken.
+
+* Per commit geeft een beeld over de impact van iedere commit op de kwaliteitsmeeting.
+* Per release (iedere release maken we een TAG dus per release = per tag), geeft een meer hoogover view.
+
+Mogelijke helpen de harde getallen in het bepalen welke optie we het beste kunnen overwegen.
+
+[source,bash]
+----
+AANTAL_COMMITS=$(git log --oneline | wc -l)
+AANTAL_TAGS=$(git tag --list | wc -l)
+
+echo "iBurgerzaken bestaat uit $AANTAL_COMMITS"
+
+echo "iBurgerzaken heeft op dit moment $AANTAL_TAGS"
+
+# Resultaat
+iBurgerzaken bestaat uit 74462
+iBurgerzaken heeft op dit moment 55
+----
+
+=== Conclusie
+
+Per commit draaien van de kwaliteitsmeeting, zou het vrijwel onmogelijk maken om een grafiek te maken van de verandering in kwaliteit.
+Daarom ga ik er vanaf nu vanuit dat mijn applicatie de vergelijkingen niet van commit op commit, maar van release tot release zal gaan maken.

@@ -1,0 +1,9 @@
+== Contribution guide
+
+This project is set up in such a way that every new contributor should be able to get up and running asap.
+
+This is done by doing the following:
+
+* Clear architecture seperation: link:diagrams#backend-component[DIAGRAM]
+* Documentation as Code: link:decisions#1[ADR]
+* Dockerized development: <<local-development,DOCKER>>

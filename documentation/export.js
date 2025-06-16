@@ -8,8 +8,14 @@ const HEADLESS = true;
 const baseUrl = 'http://localhost:9797'
 
 const urls = new Map([
-  ['overview', ''],
-  ['documentation', '/workspace/documentation/Project%20Quality%20Measurement']
+  ['ontwerp', ''],
+  ['implementatie', '/workspace/documentation/Project%20Quality%20Measurement/Quality%20Measurement%20Server'],
+  ['research-on-churn', '/workspace/documentation/research/research%20on%20churn'],
+  ['literature-study', '/workspace/documentation/research/literature%20study'],
+  ['regels-code-per-developer', '/workspace/documentation/research/regels%20code%20per%20developer'],
+  ['scope-voor-meetpunten', '/workspace/documentation/research/scope%voor%meetpunten'],
+  ['expert-interview', '/workspace/documentation/research/expert%20interview'],
+    ['proof-DaC-impl', '/workspace/documentation/research/proof-DaC-impl']
 ]);
 
 (async () => {
@@ -28,10 +34,17 @@ const urls = new Map([
     const page = await browser.newPage();
 
     console.log(` - Opening ${baseUrl}${url}`);
-    await page.goto(baseUrl+url, { waitUntil: 'domcontentloaded' });
+    await page.goto(baseUrl + url, {waitUntil: 'domcontentloaded'});
 
-    await page.waitForFunction('structurizr.scripting && structurizr.scripting.isDocumentationRendered() === true');
-
+    try {
+      await page.waitForFunction(
+          'structurizr.scripting && structurizr.scripting.isDocumentationRendered() === true',
+          { timeout: 60000 }
+      );
+    } catch (error) {
+      console.error(`Failed to render documentation for ${title}:`, error);
+      continue; // Skip to the next URL in the loop
+    }
     const outputPath = path.join(outputDir, `${title}.pdf`);
 
     console.log(` - Generating PDF for ${title}...`);

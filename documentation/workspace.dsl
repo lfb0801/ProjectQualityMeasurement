@@ -9,17 +9,8 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             }
         }
 
-        sonar = softwareSystem "SonarQube" "Static code analysis tool" "SonarQube-Server:Community" {
-            sonarServer = container "SonarServer" {
-                tags external component
-            }
-            sonarDatabase = container "Postgress" {
-                tags external db
-            }
-
-            sonarServer -> sonarDatabase "stores data in"
-
-            tags external api
+        aiModel = softwareSystem "AI Model" "This is the AI model that is used to generate reports based on the aggregated data" "openai/gpt-4" {
+            tags external
         }
 
         pqm = softwareSystem "Project Quality Measurement" "This project uses many different ways of collecting metrics and analysees about quality of a given project and generates a way to measure change in quality over time" {
@@ -33,10 +24,6 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
 
             backend = container "Quality Measurement Server" "Creates several metrics based on the target project" "java/spring" {
 
-                sonarScanner = component "Sonar scanner" {
-                    tags internal component notImplemented
-                }
-
                 gitScanner = component "Git scanner" "This component can perform git operations on a clone of the target project" {
                     tags internal component
                 }
@@ -45,64 +32,79 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
                     tags internal component
                 }
 
-                aggregator = component "Scan aggregator" "aggregates results from the different scanners" {
+                aggregator = component "Scan aggregator" "aggregates results from the different scanners and stores them as files" {
                     tags internal component
                 }
 
-                diffScanner = component "diffScanner" "Attempts to report the differences between multiple aggregates" {
-                    tags internal component notImplemented
+                aiReporter = component "AI Reporter" "Generates a report based on the aggregated data" {
+                    tags internal component
                 }
-
-                sonarScanner -> sonarServer "retrieves scan results from"
 
                 gitScanner -> targetProject "analyzes git behaviour"
                 fsScanner -> targetProject "looks at the file system/folder structure and file content in"
 
                 aggregator -> gitScanner "uses"
                 aggregator -> fsScanner "uses"
-                aggregator -> sonarScanner "uses"
 
-                diffScanner -> aggregator "retrieves multiple aggregates"
+                aiReporter -> aggregator "retrieves multiple aggregates"
 
+                aiReporter -> aiModel "sends aggregates for analysis to"
+
+                !docs docs/components
                 tags internal api
             }
 
-            frontend -> diffScanner "ask for comparison of 2 git tags"
+            frontend -> aiReporter "ask for comparison of 2 git tags"
             backend -> database "persists in"
 
-
             tags internal
+
+            !docs docs/design
         }
 
         user -> targetProject "commits and works on"
         user -> pqm "uses"
         user -> frontend "Interacts with"
 
-        sonarServer -> targetProject "analyzes"
-        pqm -> sonarServer "retrieves analysees"
+        research = softwareSystem "research" {
+            container "research on churn" {
+                !docs docs/research/measuring-churn.adoc
+            }
+            container "expert interview" {
+                !docs docs/research/expert-interview.adoc
+            }
+            container "literature study" {
+                !docs docs/research/literature-study.adoc
+            }
+            container "regels code per developer" {
+                !docs docs/research/regels-code-per-developer.adoc
+            }
+            container "scope voor meetpunten" {
+                !docs docs/research/scope-voor-meetpunten.adoc
+            }
+            container "proof-DaC-impl" {
+                !docs docs/research/implementeren-van-docs-as-code.adoc
+            }
+        }
     }
 
-    !docs docs
-    !adrs decisions
+    !adrs decisions dev.lfb0801.AsciiDocAdrImporter
 
     views {
         systemLandscape pqm {
             include *
+            include aiModel
             autolayout lr
         }
 
         systemContext targetProject context-targetProject {
             include *
+            include aiModel
             exclude user
             autolayout lr
         }
 
         container pqm container-pqm {
-            include *
-            autolayout lr
-        }
-
-        container sonar {
             include *
             autolayout lr
         }

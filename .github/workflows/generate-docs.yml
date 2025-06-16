@@ -36,6 +36,16 @@ jobs:
           npm install puppeteer cheerio
           npx puppeteer browsers install chromium@latest
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+          cache: maven
+
+      - name: First build project
+        run : mvn package
+
       - name: Setup Docker Compose
         uses: docker/setup-compose-action@v1
         with:

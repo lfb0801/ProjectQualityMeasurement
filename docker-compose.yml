@@ -6,7 +6,7 @@ services:
     ports:
       - "9797:8080"
     networks:
-      - ${NETWORK_TYPE:-ipv4}
+      - pqm
     depends_on:
       - plantuml-server
     profiles:
@@ -17,7 +17,7 @@ services:
     ports:
       - "9898:8080"
     networks:
-      - ${NETWORK_TYPE:-ipv4}
+      - pqm
     profiles:
       - docs
 
@@ -37,7 +37,7 @@ services:
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     networks:
-      - ${NETWORK_TYPE:-ipv4}
+      - pqm
     profiles:
       - local
 
@@ -66,7 +66,7 @@ services:
       retries: 12
       start_period: 5s
     networks:
-      - ${NETWORK_TYPE:-ipv4}
+      - pqm
     profiles:
       - local
 
@@ -83,7 +83,7 @@ services:
       ENGINE_con1: postgres@dbgate-plugin-postgres
       URL_con1: postgresql://sonar:sonar@postgres:5432/sonar
     networks:
-      - ${NETWORK_TYPE:-ipv4}
+      - pqm
     profiles:
       - local
 
@@ -92,14 +92,5 @@ volumes:
   dbgate-data:
 
 networks:
-  ipv4:
+  pqm:
     driver: bridge
-  dual:
-    driver: bridge
-    enable_ipv6: true
-    ipam:
-      config:
-        - subnet: "192.168.2.0/24"
-          gateway: "192.168.2.1"
-        - subnet: "2001:db8:2::/64"
-          gateway: "2001:db8:2::1"

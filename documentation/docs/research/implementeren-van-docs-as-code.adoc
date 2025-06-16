@@ -1,0 +1,41 @@
+== Implementatie van Docs as Code infrastructuur
+
+Om aan de gewenste ontwerp te voldoen, heb ik verschillende oplossingen moeten maken:
+
+- In deze eerste kunnen we zien hoe ik Github heb geconfigureerd om op iedere commit een pipeline te draaien:
+
+[source, yml]
+----
+include::../../../.github/workflows/generate-docs.yml[]
+----
+
+Belangrijk hiervoor zijn 2 verschillende punten:
+
+- In deze pipeline wordt ook het project gepackaged, waarom doen we dat?
+- We draaien een custom script om de export te generen, waarom is dit nodig en wat gebeurt er in dit script?
+
+=== Waarom bouwen we het project?
+
+Omdat ik de volgende plugin heb moeten schrijven om `.adoc` files te kunnen voor zowel de documentatie as de ADR's.
+
+[source, java]
+----
+include::../../../structurizr-plugins/src/main/java/dev/lfb0801/AsciiDocAdrImporter.java[]
+----
+
+In deze file, maken we een nieuwe implementatie van `AdrToolsDecisionImporter`, wat er voor zorgt dat decisions, nu ook d.m.v. `.adoc` files aangeleverd kunnen worden.
+
+=== Wat gebeurt er in het export.js script?
+
+In dit laatste script worden 2 dingen gedaan:
+
+. Structurizr-lite (gratis versie), is bedoeld om als "viewer" gebruikt te worden en heeft daarom geen directe export functionaliteit die we kunnen gebruiken.
+
+| vandaar dat ik gebruik maak van de Print functionaliteit, die in "praktisch" iedere browser bestaat, om de door Structurizr gegenereerde pagina's uit te printen naar PDF. (Helaas zijn deze niet altijd even mooi)
+
+. Daarnaast kan ik door dit script maar 1 document downloaden, maar kan ik van iedere pagina in mijn applicatie een PDF generen. (Ook deze PDF is op deze wijze gegenereerd)
+
+[source, js]
+----
+include::../../export.js[]
+----

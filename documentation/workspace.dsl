@@ -82,6 +82,9 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             container "scope voor meetpunten" {
                 !docs docs/research/scope-voor-meetpunten.adoc
             }
+            container "proof-DaC-impl" {
+                !docs docs/research/implementeren-van-docs-as-code.adoc
+            }
         }
     }
 

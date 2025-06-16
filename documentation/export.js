@@ -14,7 +14,8 @@ const urls = new Map([
   ['literature-study', '/workspace/documentation/research/literature%20study'],
   ['regels-code-per-developer', '/workspace/documentation/research/regels%20code%20per%20developer'],
   ['scope-voor-meetpunten', '/workspace/documentation/research/scope%voor%meetpunten'],
-  ['expert-interview', '/workspace/documentation/research/expert%20interview']
+  ['expert-interview', '/workspace/documentation/research/expert%20interview'],
+    ['proof-DaC-impl', '/workspace/documentation/research/proof-DaC-impl']
 ]);
 
 (async () => {

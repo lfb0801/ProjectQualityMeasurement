@@ -4,6 +4,14 @@
 
 Uit hoeveel regels code bestaat onze huidige codebase en wat is de verwachte groei voor de komende 5 jaar?
 
+=== Versie #2
+
+Deze nieuwe implementatie is geschreven in Java en heeft de additionele functionaliteit dat er een rekening gehouden kan worden met DocStrings/.gitignore en het verschil tussen source- en test-code
+
+image::../../images/LoCScannerImpl.png[]
+
+Deze implementatie gaat uit van een gegeven Path, wat dankzij JGit ook automatisch geconfigureerd kan worden op de gegeven Git-tag.
+
 === Versie #1
 
 Om mijn stakeholder stakeholder snel antwoord te geven op zijn vraag heb ik het volgende bash script opgesteld:

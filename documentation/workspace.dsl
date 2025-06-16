@@ -67,8 +67,8 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
         user -> frontend "Interacts with"
 
         research = softwareSystem "research" {
-            container "research on Churn" {
-                !docs docs/research/are-we-close-to-15%-resultaat.adoc
+            container "research on churn" {
+                !docs docs/research/measuring-churn.adoc
             }
             container "expert interview" {
                 !docs docs/research/expert-interview.adoc

@@ -10,11 +10,11 @@ const baseUrl = 'http://localhost:9797'
 const urls = new Map([
   ['ontwerp', ''],
   ['implementatie', '/workspace/documentation/Project%20Quality%20Measurement/Quality%20Measurement%20Server'],
-  ['Research-on-Churn', '/workspace/documentation/research/research%20on%20Churn'],
-  ['Literature-study', '/workspace/documentation/research/Literature%20study'],
+  ['research-on-churn', '/workspace/documentation/research/research%20on%20Churn'],
+  ['literature-study', '/workspace/documentation/research/literature%20study'],
   ['regels-code-per-developer', '/workspace/documentation/research/regels%20code%20per%20developer'],
-  ['Scope-voor-meetpunten', '/workspace/documentation/research/scope%voor%meetpunten'],
-  ['Expert-interview', '/workspace/documentation/research/expert%20interview']
+  ['scope-voor-meetpunten', '/workspace/documentation/research/scope%voor%meetpunten'],
+  ['expert-interview', '/workspace/documentation/research/expert%20interview']
 ]);
 
 (async () => {

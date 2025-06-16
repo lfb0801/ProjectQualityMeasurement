@@ -28,20 +28,29 @@ public class PqmConfiguration {
 	}
 
 	@Bean
-	public Repository repo() throws IOException {
+	public Repository repo() {
 		Path foo = Path.of(TARGET_PATH.value);
 		if (Files.exists(foo)) {
-			Files.walk(foo)
-					.sorted(reverseOrder())
-					.map(Path::toFile)
-					.forEach(File::delete);
-		}
-		Files.createDirectory(foo);
+            try {
+                Files.walk(foo)
+                        .sorted(reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
 
-		return new RepositoryBuilder().setWorkTree(new File(foo.toString()))
-				.setup()
-				.build();
-	}
+	            Files.createDirectory(foo);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        try {
+            return new RepositoryBuilder().setWorkTree(new File(foo.toString()))
+                    .setup()
+                    .build();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
 	@Bean
 	public Git git(Repository repo) {

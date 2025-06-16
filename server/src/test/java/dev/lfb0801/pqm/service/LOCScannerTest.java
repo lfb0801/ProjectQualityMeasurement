@@ -25,7 +25,7 @@ class LOCScannerTest {
 	@DynamicPropertySource
 	static void registerProperties(DynamicPropertyRegistry registry) {
 		registry.add("quality.target.path",
-				() -> Paths.get("")
+				() -> Paths.get("target/temp")
 						.toAbsolutePath()
 						.toString()
 		);

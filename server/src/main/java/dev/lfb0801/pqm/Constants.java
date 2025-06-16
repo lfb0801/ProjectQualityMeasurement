@@ -1,7 +1,7 @@
 package dev.lfb0801.pqm;
 
 public enum Constants {
-    TARGET_PATH("../target");
+    TARGET_PATH("target/temp");
 
     public final String value;
 

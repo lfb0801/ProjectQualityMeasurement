@@ -14,6 +14,7 @@ import org.eclipse.jgit.lib.Ref;
 import org.springframework.stereotype.Service;
 
 import dev.lfb0801.pqm.domain.Aggregate;
+import dev.lfb0801.pqm.domain.Comparing;
 
 @Service
 public class CompareService {
@@ -26,7 +27,7 @@ public class CompareService {
         this.git = git;
     }
 
-    public static List<Comparing<?>> applySequentialMappers(Comparing<?> initial, List<Function<?, ?>> mappers) {
+    private static List<Comparing<?>> applySequentialMappers(Comparing<?> initial, List<Function<?, ?>> mappers) {
         return Stream.iterate(new ArrayList<Comparing<?>>(List.of(initial)),//
                               list -> list.size() <= mappers.size(),//
                               list -> {
@@ -39,11 +40,11 @@ public class CompareService {
     }
 
     @SuppressWarnings("unchecked")
-    public static <A, B> Comparing<B> applyMapper(Comparing<A> previous, Function<?, ?> mapper) {
+    private static <A, B> Comparing<B> applyMapper(Comparing<A> previous, Function<?, ?> mapper) {
         return previous.map((Function<A, B>) mapper);
     }
 
-    public List<CompareService.Comparing<?>> compareTags(CompareService.Comparing<String> comparing) {
+    public List<Comparing<?>> compareTags(Comparing<String> comparing) {
         List<Function<?, ?>> mappers = //
             List.of(//
                     (Function<String, String>) this::findTagMatching,  //
@@ -53,7 +54,6 @@ public class CompareService {
 
         return applySequentialMappers(comparing, mappers);
     }
-
 
     public String findTagMatching(String name) {
         try {
@@ -68,7 +68,8 @@ public class CompareService {
             throw new RuntimeException(e);
         }
     }
-    public ObjectId resolveHash(String revstr) {
+
+    private ObjectId resolveHash(String revstr) {
         try {
             return git.getRepository()
                 .resolve(revstr);
@@ -77,10 +78,4 @@ public class CompareService {
         }
     }
 
-    public record Comparing<T>(T left, T second) {
-
-        public <R> Comparing<R> map(Function<T, R> mapper) {
-            return new Comparing<>(mapper.apply(left), mapper.apply(second));
-        }
-    }
 }

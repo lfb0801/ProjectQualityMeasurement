@@ -1,4 +1,4 @@
-package dev.lfb0801.pqm.service;
+package dev.lfb0801.pqm.service.scanners;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.StreamSupport.stream;

@@ -1,6 +1,7 @@
-package dev.lfb0801.pqm.service;
+package dev.lfb0801.pqm.service.scanners;
 
 import dev.lfb0801.pqm.config.PqmConfiguration;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

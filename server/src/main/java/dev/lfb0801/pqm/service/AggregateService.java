@@ -5,21 +5,20 @@ import static dev.lfb0801.pqm.domain.Aggregate.build;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.cthing.locc4j.Counts;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
 import org.springframework.stereotype.Service;
 
 import dev.lfb0801.pqm.domain.Aggregate;
+import dev.lfb0801.pqm.service.scanners.GitScanner;
+import dev.lfb0801.pqm.service.scanners.LOCScanner;
 
 @Service
 public class AggregateService {

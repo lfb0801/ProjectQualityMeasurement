@@ -65,7 +65,7 @@ public final class Unchecked {
         }
     }
 
-    static class Handlers {
+    public static class Handlers {
 
         public static final class Suppress extends Errors {
 

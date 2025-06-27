@@ -5,272 +5,195 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-@SuppressWarnings("*")
-public interface Unchecked {
-	interface Throwing {
+import org.slf4j.Logger;
+import org.springframework.validation.Errors;
 
-		interface Specific {
-			@FunctionalInterface
-			interface Runnable<E extends Throwable> {
-				void run() throws E;
-			}
+import dev.lfb0801.pqm.Unchecked.Handlers.Log;
+import dev.lfb0801.pqm.Unchecked.Handlers.Rethrow;
+import dev.lfb0801.pqm.Unchecked.Handlers.Suppress;
 
-			@FunctionalInterface
-			interface Supplier<T, E extends Throwable> {
-				T get() throws E;
-			}
+public final class Unchecked {
 
-			@FunctionalInterface
-			interface Consumer<T, E extends Throwable> {
-				void accept(T t) throws E;
-			}
+    interface Throwing {
 
-			@FunctionalInterface
-			interface Function<T, R, E extends Throwable> {
-				R apply(T t) throws E;
-			}
+        @FunctionalInterface
+        interface Runnable {
 
-			@FunctionalInterface
-			interface Predicate<T, E extends Throwable> {
-				boolean test(T t) throws E;
-			}
+            void run() throws Throwable;
+        }
 
-			@FunctionalInterface
-			interface BiConsumer<T, U, E extends Throwable> {
-				void accept(T t, U u) throws E;
-			}
+        @FunctionalInterface
+        interface Supplier<T> {
 
-			@FunctionalInterface
-			interface BiFunction<T, U, R, E extends Throwable> {
-				R apply(T t, U u) throws E;
-			}
+            T get() throws Throwable;
+        }
 
-			@FunctionalInterface
-			interface BiPredicate<T, U, E extends Throwable> {
-				boolean accept(T t, U u) throws E;
-			}
-		}
+        @FunctionalInterface
+        interface Consumer<T> {
 
-		@FunctionalInterface
-		interface Runnable extends Specific.Runnable<Throwable> {
-		}
+            void accept(T t) throws Throwable;
+        }
 
-		@FunctionalInterface
-		interface Supplier<T> extends Specific.Supplier<T, Throwable> {
-		}
+        @FunctionalInterface
+        interface Function<T, Result> {
 
-		@FunctionalInterface
-		interface Consumer<T> extends Specific.Consumer<T, Throwable> {
-		}
+            Result apply(T t) throws Throwable;
+        }
 
-		@FunctionalInterface
-		interface Function<T, R> extends Specific.Function<T, R, Throwable> {
-		}
+        @FunctionalInterface
+        interface Predicate<T> {
 
-		@FunctionalInterface
-		interface Predicate<T> extends Specific.Predicate<T, Throwable> {
-		}
+            boolean test(T t) throws Throwable;
+        }
 
-		@FunctionalInterface
-		interface BiConsumer<T, U> extends Specific.BiConsumer<T, U, Throwable> {
-		}
+        @FunctionalInterface
+        interface BiConsumer<T, U> {
 
-		@FunctionalInterface
-		interface BiFunction<T, U, R> extends Specific.BiFunction<T, U, R, Throwable> {
-		}
+            void accept(T t, U u) throws Throwable;
+        }
 
-		@FunctionalInterface
-		interface BiPredicate<T, U> extends Specific.BiPredicate<T, U, Throwable> {
-		}
-	}
+        @FunctionalInterface
+        interface BiFunction<T, U, Result> {
 
-	abstract class Errors implements Consumer<Throwable> {
+            Result apply(T t, U u) throws Throwable;
+        }
 
-		protected final Consumer<Throwable> handler;
-		private static final Handling suppress = createHandling(ignore -> {
-		});
-		private static final Rethrowing rethrow = createRethrowing(Errors::rethrowErrorAndWrapOthersAsRuntime);
+        @FunctionalInterface
+        interface BiPredicate<T, U> {
 
-		protected Errors(Consumer<Throwable> error) {
-			this.handler = error;
-		}
+            boolean accept(T t, U u) throws Throwable;
+        }
+    }
 
-		public static Handling createHandling(Consumer<Throwable> handler) {
-			return new Handling(handler);
-		}
+    static class Handlers {
 
-		public static Rethrowing createRethrowing(Function<Throwable, RuntimeException> transform) {
-			return new Rethrowing(transform);
-		}
+        public static final class Suppress extends Errors {
 
-		public static Handling suppress() {
-			return suppress;
-		}
+            public static Suppress suppress() {
+                return new Suppress();
+            }
 
-		public static Rethrowing rethrow() {
-			return rethrow;
-		}
+            @Override
+            protected void handler(Throwable throwable) {
 
-		private static RuntimeException rethrowErrorAndWrapOthersAsRuntime(Throwable e) {
-			if (e instanceof Error) {
-				throw (Error) e;
-			} else {
-				return Errors.asRuntime(e);
-			}
-		}
+            }
+        }
 
-		public static RuntimeException asRuntime(Throwable e) {
-			if (e instanceof RuntimeException) {
-				return (RuntimeException) e;
-			} else {
-				return new RuntimeException(e);
-			}
-		}
+        public static final class Rethrow extends Errors {
 
-		@Override
-		public void accept(Throwable error) {
-			handler.accept(error);
-		}
+            public static Rethrow rethrow() {
+                return new Rethrow();
+            }
 
-		public void run(Throwing.Runnable runnable) {
-			wrap(runnable).run();
-		}
+            @Override
+            protected void handler(Throwable throwable) {
+                if (throwable instanceof RuntimeException) {
+                    throw (RuntimeException) throwable;
+                } else {
+                    throw new RuntimeException(throwable);
+                }
+            }
+        }
 
-		public Runnable wrap(Throwing.Runnable runnable) {
-			return () -> {
-				try {
-					runnable.run();
-				} catch (Throwable e) {
-					handler.accept(e);
-				}
-			};
-		}
+        public static final class Log extends Errors {
 
-		public <T> Consumer<T> wrap(Throwing.Consumer<T> consumer) {
-			return val -> {
-				try {
-					consumer.accept(val);
-				} catch (Throwable e) {
-					handler.accept(e);
-				}
-			};
-		}
+            private final Logger logger;
 
-		public <T, R> Function<T, R> wrap(Throwing.Function<T, R> function) {
-			return input -> {
-				try {
-					return function.apply(input);
-				} catch (Throwable e) {
-					handler.accept(e);
-					return null;
-				}
-			};
-		}
+            private Log(Logger logger) {
+                this.logger = logger;
+            }
 
-		public static class Handling extends Errors {
-			protected Handling(Consumer<Throwable> error) {
-				super(error);
-			}
+            public static Log log(Logger logger) {
+                return new Log(logger);
+            }
 
-			public <T> T getWithDefault(Throwing.Supplier<T> supplier, T onFailure) {
-				return wrapWithDefault(supplier, onFailure).get();
-			}
+            @Override
+            protected void handler(Throwable throwable) {
+                logger.error("An error occurred", throwable);
+            }
+        }
+    }
 
-			public <T> Supplier<T> wrapWithDefault(Throwing.Supplier<T> supplier, T onFailure) {
-				return () -> {
-					try {
-						return supplier.get();
-					} catch (Throwable e) {
-						handler.accept(e);
-						return onFailure;
-					}
-				};
-			}
+    sealed abstract static class Errors permits Log, Rethrow, Suppress {
 
-			public <T, R> Function<T, R> wrapWithDefault(Throwing.Function<T, R> function, R onFailure) {
-				return wrapFunctionWithDefault(function, onFailure);
-			}
+        protected abstract void handler(Throwable throwable);
 
-			public <T> Predicate<T> wrapWithDefault(Throwing.Predicate<T> predicate, boolean onFailure) {
-				return wrapPredicateWithDefault(predicate, onFailure);
-			}
+        public void run(Throwing.Runnable runnable) {
+            runnable(runnable).run();
+        }
 
-			public <T, R> Function<T, R> wrapFunctionWithDefault(Throwing.Function<T, R> function, R onFailure) {
-				return input -> {
-					try {
-						return function.apply(input);
-					} catch (Throwable e) {
-						handler.accept(e);
-						return onFailure;
-					}
-				};
-			}
+        public <Result> Result get(Throwing.Supplier<Result> supplier) {
+            return supplier(supplier).get();
+        }
 
-			public <T> Predicate<T> wrapPredicateWithDefault(Throwing.Predicate<T> predicate, boolean onFailure) {
-				return input -> {
-					try {
-						return predicate.test(input);
-					} catch (Throwable e) {
-						handler.accept(e);
-						return onFailure;
-					}
-				};
-			}
-		}
+        public <Input, Result> Result apply(Throwing.Function<Input, Result> function, Input input) {
+            return function(function).apply(input);
+        }
 
-		public static class Rethrowing extends Errors {
-			private final Function<Throwable, RuntimeException> transform;
+        public <Input> void accept(Throwing.Consumer<Input> consumer, Input input) {
+            consumer(consumer).accept(input);
+        }
 
-			protected Rethrowing(Function<Throwable, RuntimeException> transform) {
-				super(error -> {
-					throw transform.apply(error);
-				});
-				this.transform = transform;
-			}
+        public <Input> boolean test(Throwing.Predicate<Input> predicate, Input input) {
+            return predicate(predicate).test(input);
+        }
 
-			public <T> T get(Throwing.Supplier<T> supplier) {
-				return wrap(supplier).get();
-			}
+        public <Input> boolean negate(Throwing.Predicate<Input> predicate, Input input) {
+            return predicate(predicate).negate()
+                .test(input);
+        }
 
-			public <T> Supplier<T> wrap(Throwing.Supplier<T> supplier) {
-				return () -> {
-					try {
-						return supplier.get();
-					} catch (Throwable e) {
-						throw transform.apply(e);
-					}
-				};
-			}
+        public java.lang.Runnable runnable(Throwing.Runnable runnable) {
+            return () -> {
+                try {
+                    runnable.run();
+                } catch (Throwable e) {
+                    handler(e);
+                }
+            };
+        }
 
-			public <T, R> Function<T, R> wrap(Throwing.Function<T, R> function) {
-				return wrapFunction(function);
-			}
+        public <Input> Consumer<Input> consumer(Throwing.Consumer<Input> consumer) {
+            return val -> {
+                try {
+                    consumer.accept(val);
+                } catch (Throwable e) {
+                    handler(e);
+                }
+            };
+        }
 
-			public <T> Predicate<T> wrap(Throwing.Predicate<T> predicate) {
-				return wrapPredicate(predicate);
-			}
+        public <Result> Supplier<Result> supplier(Throwing.Supplier<Result> supplier) {
+            return () -> {
+                try {
+                    return supplier.get();
+                } catch (Throwable e) {
+                    handler(e);
+                }
+                return null;
+            };
+        }
 
-			public <T, R> Function<T, R> wrapFunction(Throwing.Function<T, R> function) {
-				return arg -> {
-					try {
-						return function.apply(arg);
-					} catch (Throwable e) {
-						throw transform.apply(e);
-					}
-				};
-			}
+        public <Input, Result> Function<Input, Result> function(Throwing.Function<Input, Result> function) {
+            return input -> {
+                try {
+                    return function.apply(input);
+                } catch (Throwable e) {
+                    handler(e);
+                    return null;
+                }
+            };
+        }
 
-			public <T> Predicate<T> wrapPredicate(Throwing.Predicate<T> predicate) {
-				return arg -> {
-					try {
-						return predicate.test(arg);
-					} catch (Throwable e) {
-						throw transform.apply(e); // 1 855 548 2505
-					}
-				};
-			}
-		}
-
-	}
-
+        public <Input> Predicate<Input> predicate(Throwing.Predicate<Input> predicate) {
+            return input -> {
+                try {
+                    return predicate.test(input);
+                } catch (Throwable e) {
+                    handler(e);
+                    return false;
+                }
+            };
+        }
+    }
 }

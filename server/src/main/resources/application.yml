@@ -1,3 +1,5 @@
-quality:
-  target:
+pma:
+  config:
     path: test
+    blocked-authors:
+      - renovatebot@pinkroccade.nl

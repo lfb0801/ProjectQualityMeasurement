@@ -17,25 +17,23 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 public abstract class GitFSEnvironment {
 
     public static Git remote;
     public static Git local;
-    private static Path tempRepoPath;
+    public static Path tempRepoPath;
 
-    @DynamicPropertySource
-    static void registerProperties(DynamicPropertyRegistry registry) {
-        setup(); // initializes GitFSEnvironment (remote + local)
+    @BeforeAll
+    static void registerProperties() {
+        remote = initRepository();
+        local = cloneRepository();
 
         tempRepoPath = local.getRepository()
             .getWorkTree()
             .toPath();
 
-        suppress()
-            .run(() -> {
+        suppress().run(() -> {
             createMockFile(0, 0);
             createMockFile(0, 1);
 
@@ -48,23 +46,20 @@ public abstract class GitFSEnvironment {
                 .call();
             local.tag()
                 .setObjectId(local.log()
-                                 .setMaxCount(1)
-                                 .call()
-                                 .iterator()
-                                 .next())
+                    .setMaxCount(1)
+                    .call()
+                    .iterator()
+                    .next())
                 .setName("release/0.0")
                 .setForceUpdate(false)
                 .call();
         });
         commitNewFileAndRelease(1, 0);
         commitNewFileAndRelease(1, 1);
-
-        registry.add("quality.target.path", () -> tempRepoPath.toString());
     }
 
     private static void commitNewFileAndRelease(int module, int file) {
-        suppress()
-            .run(() -> {
+        suppress().run(() -> {
             createMockFile(module, file);
 
             local.add()
@@ -78,10 +73,10 @@ public abstract class GitFSEnvironment {
             local.tag()
                 .setName("release/%s.%s".formatted(module, file))
                 .setObjectId(local.log()
-                                 .setMaxCount(1)
-                                 .call()
-                                 .iterator()
-                                 .next())
+                    .setMaxCount(1)
+                    .call()
+                    .iterator()
+                    .next())
                 .setForceUpdate(false)
                 .call();
         });
@@ -134,7 +129,7 @@ public abstract class GitFSEnvironment {
 
     public static void appendToFile(String relativePath, String content) throws IOException {
         File file = new File(local.getRepository()
-                                 .getWorkTree(), relativePath
+            .getWorkTree(), relativePath
         );
         File parent = file.getParentFile();
         if (parent != null) {
@@ -144,12 +139,6 @@ public abstract class GitFSEnvironment {
         try (var fos = new FileOutputStream(file)) {
             fos.write((old + "\n" + content).getBytes(StandardCharsets.UTF_8));
         }
-    }
-
-    @BeforeAll
-    static void setup() {
-        remote = initRepository();
-        local = cloneRepository();
     }
 
     @AfterAll
@@ -164,16 +153,15 @@ public abstract class GitFSEnvironment {
             .forEach(e -> {
                 e.getValue()
                     .run();
-                suppress()
-                    .accept((String s) -> {
-                                    local.add()
-                                        .setAll(true)
-                                        .call();
+                suppress().accept((String s) -> {
+                        local.add()
+                            .setAll(true)
+                            .call();
 
-                                    local.commit()
-                                        .setMessage(s)
-                                        .call();
-                                }, e.getKey()
+                        local.commit()
+                            .setMessage(s)
+                            .call();
+                    }, e.getKey()
                 );
             });
     }

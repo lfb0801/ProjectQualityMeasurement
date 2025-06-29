@@ -19,39 +19,41 @@ import org.eclipse.jgit.lib.Constants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import dev.lfb0801.pqm.config.PMAProperties;
 import dev.lfb0801.pqm.service.GitFSEnvironment;
 
 class GitScannerTest extends GitFSEnvironment {
+
+    private final GitScanner gitScanner = new GitScanner(local, new PMAProperties(tempRepoPath.toString(), List.of()));
 
     @Test
     @DisplayName("If the second commit removes 1 of the files, then only the remaining file will be returned")
     void happyFlow() throws IOException, GitAPIException {
 
-        GitScanner gitScanner = new GitScanner(local);
         final String deletedFile = "deleted.txt";
         final String remainingFile = "remaining.txt";
 
         performCommits(List.of(suppress().runnable(() -> {
-                                   appendToFile(deletedFile, "");
-                                   appendToFile(remainingFile, "");
+                appendToFile(deletedFile, "");
+                appendToFile(remainingFile, "");
 
-                                   appendToFile(deletedFile, "Hello World!");
-                               }), suppress().runnable(() -> {
-                                   appendToFile(remainingFile, "Salve Mundi!");
-                               }), suppress().runnable(() -> {
-                                   new File(local.getRepository()
-                                                .getWorkTree(), deletedFile
-                                   ).delete();
-                               })
+                appendToFile(deletedFile, "Hello World!");
+            }), suppress().runnable(() -> {
+                appendToFile(remainingFile, "Salve Mundi!");
+            }), suppress().runnable(() -> {
+                new File(local.getRepository()
+                    .getWorkTree(), deletedFile
+                ).delete();
+            })
         ));
 
         var everyCommittedFile = gitScanner.getFilesInRepository(local.getRepository()
-                                                                     .resolve(Constants.HEAD));
+            .resolve(Constants.HEAD));
         var commitCountPerFile = Stream.of(remainingFile, deletedFile)
             .map(suppress().function(file -> Map.entry(file, gitScanner.getCommitsContainingFile(file))))
             .collect(toMap(Map.Entry::getKey,
-                           set -> set.getValue()
-                               .size()
+                set -> set.getValue()
+                    .size()
             ));
 
         assertThat(everyCommittedFile).contains(remainingFile)
@@ -64,25 +66,24 @@ class GitScannerTest extends GitFSEnvironment {
     @DisplayName("Let's test if my implementation breaks when there are a lot of commits")
     void loadTest() throws IOException, GitAPIException {
 
-        GitScanner gitScanner = new GitScanner(local);
         final String file = "new.txt";
 
         performCommits(concat(Stream.of(suppress().runnable(() -> {
-                                  appendToFile(file, "");
-                              })),
-                              IntStream.range(1, 1000)
-                                  .mapToObj(i -> suppress().runnable(() -> {
-                                      appendToFile(file, String.valueOf(i));
-                                  }))
+                appendToFile(file, "");
+            })),
+            IntStream.range(1, 1000)
+                .mapToObj(i -> suppress().runnable(() -> {
+                    appendToFile(file, String.valueOf(i));
+                }))
         ).toList());
 
         var everyCommittedFile = gitScanner.getFilesInRepository(local.getRepository()
-                                                                     .resolve(Constants.HEAD));
+            .resolve(Constants.HEAD));
         var commitCountPerFile = Stream.of(file)
             .map(suppress().function(f -> Map.entry(f, gitScanner.getCommitsContainingFile(f))))
             .collect(toMap(Map.Entry::getKey,
-                           set -> set.getValue()
-                               .size()
+                set -> set.getValue()
+                    .size()
             ));
 
         assertThat(everyCommittedFile).contains(file);

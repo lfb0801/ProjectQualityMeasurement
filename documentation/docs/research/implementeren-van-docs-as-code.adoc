@@ -94,25 +94,24 @@ Omdat ik de volgende plugin heb moeten schrijven om `.adoc` files te kunnen voor
 
 [source, java]
 ----
-	@Override
-	public void importDocumentation(Documentable documentable, File path) {
-        super.importDocumentation(documentable, path);
+@Override
+public void importDocumentation(Documentable documentable, File path) {
+    super.importDocumentation(documentable, path);
 
-        Optional.ofNullable(path.listFiles((dir, name) -> name.endsWith(".adoc")))
-                .stream()
-                .flatMap(Arrays::stream)
-                .forEach(file -> {
-                    Decision decision = null;
-                    try {
-                        decision = this.importDecision(file);
-                        documentable.getDocumentation()
-                                .addDecision(decision);
-                    } catch (Exception e) {
-                        throw new DocumentationImportException(e);
-                    }
-                });
-		}
-	}
+    Optional.ofNullable(path.listFiles((dir, name) -> name.endsWith(".adoc")))
+        .stream()
+        .flatMap(Arrays::stream)
+        .forEach(file -> {
+            Decision decision = null;
+            try {
+                decision = this.importDecision(file);
+                documentable.getDocumentation()
+                        .addDecision(decision);
+            } catch (Exception e) {
+                throw new DocumentationImportException(e);
+            }
+        });
+}
 ----
 
 In deze file, maken we een nieuwe implementatie van `AdrToolsDecisionImporter`, wat er voor zorgt dat decisions, nu ook d.m.v. `.adoc` files aangeleverd kunnen worden.

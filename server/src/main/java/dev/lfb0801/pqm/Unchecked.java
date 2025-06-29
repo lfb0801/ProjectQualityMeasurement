@@ -6,7 +6,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
-import org.springframework.validation.Errors;
 
 import dev.lfb0801.pqm.Unchecked.Handlers.Log;
 import dev.lfb0801.pqm.Unchecked.Handlers.Rethrow;

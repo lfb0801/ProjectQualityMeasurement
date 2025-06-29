@@ -62,9 +62,9 @@ public class AggregateService {
     private int getLinesOfCodeFor(Map<Path, Counts> scanResult, String file) {
 
         return Optional.ofNullable(scanResult.getOrDefault(new File(git.getRepository()
-                                                                        .getWorkTree(), //
-                                                                    file
-                                                           ).toPath(), null
+                    .getWorkTree(), //
+                    file
+                ).toPath(), null
             ))
             .map(Counts::getCodeLines)
             .orElse(0);

@@ -21,7 +21,7 @@ class AggregateServiceTest extends GitFSEnvironment {
     @Test
     void testAggregateService() throws IOException {
         var result = aggregateService.aggregate(local.getRepository()
-                                                    .resolve(getInitialCommitRef()));
+            .resolve(getInitialCommitRef()));
 
         assertThat(result)//
             .allMatch(a -> a.locSrc() == 6)
@@ -31,8 +31,8 @@ class AggregateServiceTest extends GitFSEnvironment {
 
     private String getInitialCommitRef() {
         return suppress().get(() -> StreamSupport.stream(local.log()
-                                                             .call()
-                                                             .spliterator(), false
+                .call()
+                .spliterator(), false
             )
             .toList()
             .getLast()

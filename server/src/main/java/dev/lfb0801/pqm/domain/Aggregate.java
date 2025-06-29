@@ -1,9 +1,9 @@
 package dev.lfb0801.pqm.domain;
 
-import io.soabase.recordbuilder.core.RecordBuilder;
-
 import java.util.Set;
 import java.util.function.Consumer;
+
+import io.soabase.recordbuilder.core.RecordBuilder;
 
 @RecordBuilder
 public record Aggregate(String file, int locSrc, int locTest, Set<String> commits) {

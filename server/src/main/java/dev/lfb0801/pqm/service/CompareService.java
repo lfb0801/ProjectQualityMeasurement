@@ -29,11 +29,11 @@ public class CompareService {
 
     private static List<Comparing<?>> applySequentialMappers(Comparing<?> initial, List<Function<?, ?>> mappers) {
         return Stream.iterate(new ArrayList<Comparing<?>>(List.of(initial)),//
-                              list -> list.size() <= mappers.size(),//
-                              list -> {
-                                  list.add(applyMapper(list.getLast(), mappers.get(list.size() - 1)));
-                                  return list;
-                              }
+                list -> list.size() <= mappers.size(),//
+                list -> {
+                    list.add(applyMapper(list.getLast(), mappers.get(list.size() - 1)));
+                    return list;
+                }
             )
             .reduce((a, b) -> b)
             .orElseThrow();
@@ -47,9 +47,9 @@ public class CompareService {
     public List<Comparing<?>> compareTags(Comparing<String> comparing) {
         List<Function<?, ?>> mappers = //
             List.of(//
-                    (Function<String, String>) this::findTagMatching,  //
-                    (Function<String, ObjectId>) this::resolveHash, //
-                    (Function<ObjectId, Set<Aggregate>>) aggregateService::aggregate //
+                (Function<String, String>) this::findTagMatching,  //
+                (Function<String, ObjectId>) this::resolveHash, //
+                (Function<ObjectId, Set<Aggregate>>) aggregateService::aggregate //
             );
 
         return applySequentialMappers(comparing, mappers);

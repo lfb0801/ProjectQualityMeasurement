@@ -1,0 +1,89 @@
+== Test strategie
+=== Inleiding
+
+In dit document beschrijven we de strategie voor het uitvoeren van systeemtesten. Deze teststrategie vormt de basis voor de latere stap van testautomatisering bij de uitvoering van de testen.
+
+=== Doelstellingen
+
+* **Verifiëren** dat de analyse-functionaliteit (repository inlezen, commits lezen, LoC berekenen) correct werkt onder diverse omstandigheden.
+* **Waarborgen** dat alle systeemgrenzen en belangrijke use-cases afgedekt zijn.
+* **Ondersteunen** van continue integratie door tests zo atomair, reproduceerbaar en geautomatiseerd mogelijk te maken.
+
+=== Scope
+
+* **In scope**: de complete flow van repository-initialisatie, commit-iteratie, LoC-meting, en het rapportage‐mechanisme.
+* **Out of scope**: GUI-componenten (indien aanwezig), performance-stress-testen, beveiligings-testen.
+
+=== Testniveau en -methoden
+
+==== Testniveau
+
+* **Systeemtesten**: de applicatie als geheel draaien, inclusief Spring Boot-context en JGit-integratie.
+
+==== Testmethoden
+
+* **Functioneel**: validatie van correcte resultaten (aantal bestanden, commits, LoC) bij verschillende repository-structuren.
+* **Robuustheid**: foutscenario’s (corrupt repo, ontbrekende permissies, lege repo).
+* **Reproduceerbaarheid**: gebruik van virtuele bestanden-systeem (Jimfs) om testisolatie te garanderen.
+
+=== Testontwerp & Testdata
+
+==== Virtueel bestanden­systeem
+
+* **Jimfs** (Google) instellen als in‐memory FS binnen je JUnit-tests, zodat iedere testcase begint met een schone, geïsoleerde omgeving.
+* Voor elke testcase:
+
+1. **Opzetten**: nieuwe Jimfs-filesystem aanmaken.
+2. **Repository initialisatie**: via `Git.init().setDirectory(fs.getPath(…))`.
+3. **Commit‐data** aanmaken: bestanden schrijven, `git add`, `git commit`.
+
+==== Testdata sets
+
+* **Klein project**: enkele bestanden met korte inhoud.
+* **Groot project**: tientallen bestanden, meerdere commits.
+* **Edge cases**: binaire bestanden, lege mappen, geen commits.
+
+=== Testautomatisering
+
+==== Frameworks
+
+* **JUnit 5** voor de testcases.
+* **Spring Boot Test** (`@SpringBootTest`) om de volledige context te laden waar nodig.
+* **Mockito**/`@MockBean` voor het isoleren van afhankelijkheden (bijv. externe services).
+
+==== CI-integratie
+
+* Voeg teststappen toe aan je pipeline (GitLab CI, Jenkins, GitHub Actions):
+
+  ```yaml
+  test:
+    stage: test
+    script:
+      - mvn test -B
+  ```
+* Zorg dat Jimfs-tests snel (< 1s) blijven; voorkom zware I/O of netwerktoegang.
+
+==== Rapportage & Coverage
+
+* **Surefire Report** (HTML/XML) voor testresultaten.
+* **JaCoCo** voor code‐coverage met minimum­drempels (bijv. 80 %).
+
+=== Testomgeving & Infrastructuur
+
+| Omgeving        | Configuratie                                 | Doel                               |
+| --------------- | -------------------------------------------- | ---------------------------------- |
+| **Lokaal dev**  | Java 21, Maven, Jimfs in‐memory FS           | Ontwikkelaarstest, snelle feedback |
+| **CI-pijplijn** | Container JDK 21, Maven, cached dependencies | Geautomatiseerde end‐to‐end tests  |
+
+=== Risico’s & Mitigatie
+
+| Risico                                 | Mitigatie                                                          |
+| -------------------------------------- | ------------------------------------------------------------------ |
+| Jimfs gedraagt zich anders dan echt FS | Testen die geen aanpassingen maken aan het filesystem draaien, richting de repo van het project |
+| Trage tests door veel data             | Testdata wordt gegenereerd vanuit de test, en verwijderen de data na gebruik                |
+
+=== Bijlagen
+
+* **Test‐template** (JUnit‐klasse met voorbeeld Jimfs‐setup).
+* **CI-configuratie** (voorbeeld YAML).
+* **Coding standards** voor testcases.

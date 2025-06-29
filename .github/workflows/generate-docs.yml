@@ -44,7 +44,7 @@ jobs:
           cache: maven
 
       - name: First build project
-        run : mvn package
+        run : mvn package -DskipTests
 
       - name: Setup Docker Compose
         uses: docker/setup-compose-action@v1

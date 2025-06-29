@@ -26,29 +26,31 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
 
                 gitScanner = component "Git scanner" "This component can perform git operations on a clone of the target project" {
                     tags internal component
+                    -> targetProject "analyzes git behaviour"
                 }
 
-                fsScanner = component "File system scanner" {
+                locScanner = component "Lines of Code scanner" {
                     tags internal component
+                    -> targetProject "looks at the file system/folder structure and file content in"
                 }
 
                 aggregator = component "Scan aggregator" "aggregates results from the different scanners and stores them as files" {
                     tags internal component
+                    -> gitScanner "uses"
+                    -> locScanner "uses"
+                    -> database "stores aggregates into"
                 }
 
-                aiReporter = component "AI Reporter" "Generates a report based on the aggregated data" {
+                aiReporter = component "AI Reporter" "Based on the given data, creates a Prompt to send to the desired LLM" {
                     tags internal component
+                    -> aiModel "communicates with" "Spring-AI"
                 }
 
-                gitScanner -> targetProject "analyzes git behaviour"
-                fsScanner -> targetProject "looks at the file system/folder structure and file content in"
-
-                aggregator -> gitScanner "uses"
-                aggregator -> fsScanner "uses"
-
-                aiReporter -> aggregator "retrieves multiple aggregates"
-
-                aiReporter -> aiModel "sends aggregates for analysis to"
+                comparator = component "Comparator" "This component is used to ensure that every step is applied to both sides of the analysis" {
+                    tags internal component
+                    -> aggregator "uses"
+                    -> aiReporter "reports through"
+                }
 
                 !docs docs/components
                 tags internal api
@@ -58,7 +60,6 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             backend -> database "persists in"
 
             tags internal
-
             !docs docs/design
         }
 
@@ -94,6 +95,7 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
         systemLandscape pqm {
             include *
             include aiModel
+            exclude research
             autolayout lr
         }
 
@@ -101,6 +103,7 @@ workspace "Project Quality Measurement" "Docs, ADRs and C4-diagrams" {
             include *
             include aiModel
             exclude user
+            exclude research
             autolayout lr
         }
 

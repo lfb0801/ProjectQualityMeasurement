@@ -16,40 +16,32 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.ContextConfiguration;
 
+@SpringBootTest(classes = TestConfig.class)
 public abstract class GitFSEnvironment {
 
-    public static Git remote;
-    public static Git local;
-    public static Path tempRepoPath;
+    @Autowired
+    public Git git;
 
-    @BeforeAll
-    static void registerProperties() {
-        remote = initRepository();
-        local = cloneRepository();
-
-        tempRepoPath = local.getRepository()
-            .getWorkTree()
-            .toPath();
-
+    @BeforeEach
+    void beforeEach() {
         suppress().run(() -> {
+            createModule();
             createMockFile(0, 0);
             createMockFile(0, 1);
 
-            local.add()
-                .setAll(true)
-                .call();
+            git.add().setAll(true).call();
 
-            local.commit()
-                .setMessage("initial commit")
-                .call();
-            local.tag()
-                .setObjectId(local.log()
-                    .setMaxCount(1)
-                    .call()
-                    .iterator()
-                    .next())
+            git.commit().setMessage("initial commit").call();
+            git.tag()
+                .setObjectId(git.log().setMaxCount(1).call().iterator().next())
                 .setName("release/0.0")
                 .setForceUpdate(false)
                 .call();
@@ -58,38 +50,30 @@ public abstract class GitFSEnvironment {
         commitNewFileAndRelease(1, 1);
     }
 
-    private static void commitNewFileAndRelease(int module, int file) {
+    private void commitNewFileAndRelease(int module, int file) {
         suppress().run(() -> {
             createMockFile(module, file);
-
-            local.add()
-                .setAll(true)
-                .call();
-
-            local.commit()
-                .setMessage("committing:" + module + "." + file)
-                .call();
-
-            local.tag()
-                .setName("release/%s.%s".formatted(module, file))
-                .setObjectId(local.log()
-                    .setMaxCount(1)
-                    .call()
-                    .iterator()
-                    .next())
+            git.add().setAll(true).call();
+            git.commit().setMessage("committing:" + module + "." + file).call();
+            git.tag().setName("release/%s.%s".formatted(module, file))
+                .setObjectId(git.log().setMaxCount(1).call().iterator().next())
                 .setForceUpdate(false)
                 .call();
         });
     }
 
-    private static void createMockFile(int i, int j) throws IOException {
+    private void createMockFile(int i, int j) throws IOException {
         String className = "Class" + j + ".java";
         String packageName = "com/example/module" + i;
         String path = "src/main/java/" + packageName + "/" + className;
         appendToFile(path, generateFakeJavaClass(className, i, j));
     }
 
-    private static String generateFakeJavaClass(String className, int module, int index) {
+    private void createModule() throws IOException {
+        appendToFile("pom.xml", "<inside of a pom file>");
+    }
+
+    private String generateFakeJavaClass(String className, int module, int index) {
         return """
             package com.example.module%d;
             
@@ -101,34 +85,8 @@ public abstract class GitFSEnvironment {
             """.formatted(module, className.replace(".java", ""), className.replace(".java", ""), index);
     }
 
-    private static Git initRepository() {
-        try {
-            return Git.init()
-                .setDirectory(Files.newTemporaryFolder())
-                .call();
-        } catch (GitAPIException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private static Git cloneRepository() {
-        try {
-            String remoteUri = remote.getRepository()
-                .getDirectory()
-                .getCanonicalPath();
-            File localDir = Files.newTemporaryFolder();
-
-            return Git.cloneRepository()
-                .setURI(remoteUri)
-                .setDirectory(localDir)
-                .call();
-        } catch (GitAPIException | IOException exception) {
-            throw new IllegalStateException();
-        }
-    }
-
-    public static void appendToFile(String relativePath, String content) throws IOException {
-        File file = new File(local.getRepository()
+    public void appendToFile(String relativePath, String content) throws IOException {
+        File file = new File(git.getRepository()
             .getWorkTree(), relativePath
         );
         File parent = file.getParentFile();
@@ -141,33 +99,22 @@ public abstract class GitFSEnvironment {
         }
     }
 
-    @AfterAll
-    static void tearDown() {
-        remote.close();
-        local.close();
-    }
-
-    public static void performCommits(List<Runnable> commits) {
+    public void performCommits(List<Runnable> commits) {
         IntStream.range(0, commits.size())
             .mapToObj(i -> Map.entry("commit: %s".formatted(i), commits.get(i)))
             .forEach(e -> {
                 e.getValue()
                     .run();
                 suppress().accept((String s) -> {
-                        local.add()
+                        git.add()
                             .setAll(true)
                             .call();
 
-                        local.commit()
+                        git.commit()
                             .setMessage(s)
                             .call();
                     }, e.getKey()
                 );
             });
-    }
-
-    @Bean
-    Git git() {
-        return local;
     }
 }

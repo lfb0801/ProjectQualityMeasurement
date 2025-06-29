@@ -24,16 +24,13 @@ In dit document beschrijven we de strategie voor het uitvoeren van systeemtesten
 
 * **Functioneel**: validatie van correcte resultaten (aantal bestanden, commits, LoC) bij verschillende repository-structuren.
 * **Robuustheid**: foutscenario’s (corrupt repo, ontbrekende permissies, lege repo).
-* **Reproduceerbaarheid**: gebruik van virtuele bestanden-systeem (Jimfs) om testisolatie te garanderen.
+* **Reproduceerbaarheid**: gebruik van virtuele bestanden-systeem om testisolatie te garanderen.
 
 === Testontwerp & Testdata
 
 ==== Virtueel bestanden­systeem
 
-* **Jimfs** (Google) instellen als in‐memory FS binnen je JUnit-tests, zodat iedere testcase begint met een schone, geïsoleerde omgeving.
-* Voor elke testcase:
-
-1. **Opzetten**: nieuwe Jimfs-filesystem aanmaken.
+1. **Opzetten**: nieuw virtual-filesystem aanmaken.
 2. **Repository initialisatie**: via `Git.init().setDirectory(fs.getPath(…))`.
 3. **Commit‐data** aanmaken: bestanden schrijven, `git add`, `git commit`.
 
@@ -70,20 +67,51 @@ In dit document beschrijven we de strategie voor het uitvoeren van systeemtesten
 
 === Testomgeving & Infrastructuur
 
-| Omgeving        | Configuratie                                 | Doel                               |
-| --------------- | -------------------------------------------- | ---------------------------------- |
-| **Lokaal dev**  | Java 21, Maven, Jimfs in‐memory FS           | Ontwikkelaarstest, snelle feedback |
-| **CI-pijplijn** | Container JDK 21, Maven, cached dependencies | Geautomatiseerde end‐to‐end tests  |
 
-=== Risico’s & Mitigatie
+|===
+|Omgeving |Configuratie |Doel
 
-| Risico                                 | Mitigatie                                                          |
-| -------------------------------------- | ------------------------------------------------------------------ |
-| Jimfs gedraagt zich anders dan echt FS | Testen die geen aanpassingen maken aan het filesystem draaien, richting de repo van het project |
-| Trage tests door veel data             | Testdata wordt gegenereerd vanuit de test, en verwijderen de data na gebruik                |
+|**Lokaal dev**
+|Java 21, Maven, virtual file-system
+|Ontwikkelaarstest, snelle feedback
+
+|**CI-pijplijn**
+|Container JDK 21, Maven, cached dependencies
+|Geautomatiseerde end‐to‐end tests
+|===
 
 === Bijlagen
 
-* **Test‐template** (JUnit‐klasse met voorbeeld Jimfs‐setup).
+* **Test‐template** (JUnit‐class met voorbeeld).
+
+image::../../images/exampleTestThatMakesCommits.png[]
+
 * **CI-configuratie** (voorbeeld YAML).
+
+[source, yaml]
+----
+name: Java CI with Maven
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'zulu'
+        cache: maven
+    - name: Build with Maven
+      run: mvn clean verify
+
+----
+
 * **Coding standards** voor testcases.
+
+image::../../images/abstractBaseTestClass.png[]

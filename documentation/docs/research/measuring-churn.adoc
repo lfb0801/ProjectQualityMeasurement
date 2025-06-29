@@ -1,8 +1,18 @@
-== Zien wij een gezonden churn in onze code?
+== Zien wij een gezonde churn binnen onze codebase?
 
 === Requirement
 
-Uit hoeveel regels code bestaat onze huidige codebase en wat is de verwachte groei voor de komende 5 jaar?
+Kunnen we de onderhoudbaarheid van verschillende componenten binnen de code beoordelen, door puur te kijken naar de hoeveelheid code aanwezig in het component.
+
+== Versie #3
+
+In de nieuwe versie van de LoCScanner is er een verandering te zien in de return types van de scan functies. Deze zijn namelijk mee veranderd met de rest van de applicatie sinds we zijn overgestapt van file-based quality metrics, naar project-based.
+
+image::../../images/LoCScannerImpl3.png[]
+
+Zonder deze aanpassing, zouden we voor iedere file in het project deze scan opnieuw uit moeten voeren en vervolgens logica schrijven om deze resultaten vervolgens correct samen te voegen.
+
+Hierdoor behouden we een implementatie die schaalbaar blijft in een steeds veranderende applicatie.
 
 === Versie #2
 

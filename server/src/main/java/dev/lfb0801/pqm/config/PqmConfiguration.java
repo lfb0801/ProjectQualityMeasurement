@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -17,6 +19,12 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import dev.lfb0801.pqm.domain.Aggregate;
+import dev.lfb0801.pqm.domain.Comparing;
+import dev.lfb0801.pqm.service.AIReporter;
 
 @Configuration
 @EnableConfigurationProperties(PMAProperties.class)
@@ -66,5 +74,16 @@ public class PqmConfiguration {
             throw new IllegalArgumentException("Repository should already exist", e);
         }
         return git;
+    }
+
+    @Primary
+    @Bean
+    public AIReporter aiReporter() {
+        return new AIReporter(null){
+            @Override
+            public String report(Comparing<Entry<String, Set<Aggregate>>> comparing) throws JsonProcessingException {
+                return "Failure trying to connect to Model";
+            }
+        };
     }
 }

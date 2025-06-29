@@ -1,5 +1,6 @@
 = SonarQube Metrics, Goodhart’s Law, and Long-Term Code Quality
 :pdf-theme: adoc-style.yml
+:toc: auto
 
 == Introduction
 
@@ -53,7 +54,7 @@ However, this doesn’t mean SonarQube and similar tools have no value – in fa
 
 In conclusion, the hypothesis is confirmed – **when code quality metrics become goals, developers often meet the goals in ways that don’t truly improve the code**. Goodhart’s Law manifests in software engineering as shallow fixes that quiet the tool but fail to enhance maintainability or readability in a significant way. The boy scout rule, while positive in spirit, does not fully counteract this tendency and has its own pitfalls if not complemented by broader technical leadership and planning. True long-term quality improvement comes from aligning metric-driven practices with the underlying qualitative goals: focusing on maintainability improvements that matter, educating developers on *why* an issue is flagged, and keeping metrics in their place as guides rather than absolute objectives. SonarQube can be a powerful ally for quality – but only if we remember that the real goal is high-quality, maintainable code, not just a high quality score.
 
-== Sources:
+== Sources
 
 1. Hamer, S. & Quesada-López, C. (2023). *Students’ perceptions of integrating a contribution measurement tool in software engineering projects.* – Reveals that metric-driven tools (Git/SonarQube) can lead to “box-ticking” behavior by students, focusing on pleasing the tool over genuine improvements.
 2. Tóth, Z. et al. (2015). *Comparison of Static Analysis Tools for Quality Measurement of RPG Programs.* – Notes weaknesses in static analysis metrics and how developers often meet the letter of the rules without improving architecture, echoing Goodhart’s Law.

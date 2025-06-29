@@ -58,9 +58,7 @@ ____
 Uit zijn reactie haal ik het volgende:
 
 ____
-
 To some extent, you can game any tool or metric, but a Code Health measure is harder to "game" since it's more about design and structure of the code
-
 ____
 
-Ik zal in mijn kwaliteitsmeting een vergelijkbare approach moeten hebben, als hoe CodeScene code health meet, mijn meting moet kijken naar gedrag en structuur en niet naar line-by-line metingen.
+Ik zal in mijn kwaliteitsmeting een vergelijkbare approach moeten hebben, als hoe CodeScene code health meet, mijn meting moet kijken naar gedrag en structuur en niet naar file-by-file metingen.

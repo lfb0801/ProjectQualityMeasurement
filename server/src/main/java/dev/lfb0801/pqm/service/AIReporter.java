@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +23,10 @@ public class AIReporter {
         this.chatClient = chatClient;
     }
 
-
     public String report(Comparing<Map.Entry<String, Set<Aggregate>>> comparing) throws JsonProcessingException {
 
         var message = """
-            We wan't to compare 2 versions of a project.
+            We want to compare 2 versions of a project.
             It's your task to look at the given information about the 2 versions and provide a report about the differences.
             Focussing on how the health of the project is affected by the changes, from version 1 to version 2.
             
@@ -47,7 +45,7 @@ public class AIReporter {
                 .getValue())
         );
 
-        return chatClient.prompt(new Prompt(message))
+        return chatClient.prompt(message)
             .call()
             .content();
     }

@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -28,50 +29,65 @@ public class GitScanner {
         this.pmaProperties = pmaProperties;
     }
 
-    public Set<String> getFilesInRepository(ObjectId objectId) throws IOException, GitAPIException {
+    public Set<String> getModulesInRepository(ObjectId objectId) throws IOException, GitAPIException {
         git.checkout()
             .setName(objectId.getName())
             .call();
-        return listFilesInCommit();
-    }
-
-    public Set<String> getCommitsContainingFile(String file) throws GitAPIException, IOException {
-        final var repo = git.getRepository();
-        return Set.copyOf(stream(git.log()
-            .add(repo.resolve("HEAD"))
-            //  Adding a path to a log-command will only log commits that relate to the given path.
-            .addPath(file)
-            .call()
-            .spliterator(), false
-        )//
-            // Commits by authors (like bots) shouldn't be part of counted
-            .filter(commit -> pmaProperties.blockedAuthors()
-                .contains(commit.getAuthorIdent()
-                    .getEmailAddress()))
-            .map(RevCommit::getFirstMessageLine)
-            .toList()
-            .reversed());
-    }
-
-    private Set<String> listFilesInCommit() throws IOException {
         return Files.walk(git.getRepository()
                 .getWorkTree()
                 .toPath())
-            .filter(Files::isRegularFile)
             //  Specifically .git files shouldn't ever be included
             .filter(not((path -> path.toString()
                 .contains(".git"))))
-            //  We want the path relative from the root of the project,
-            //  to allow for multiple files with the same name
-            .map(path -> git.getRepository()
-                .getWorkTree()
-                .toPath()
-                .relativize(path))
-            //  Only analyse maven modules, by looking for the pom.xml files
             .filter(path -> "pom.xml".equals(path.getFileName()
                 .toString()))
             .map(Path::getParent)
             .map(Path::toString)
             .collect(Collectors.toSet());
+    }
+
+    public Set<String> getFilesInRepository(ObjectId objectId) throws IOException, GitAPIException {
+        git.checkout()
+            .setName(objectId.getName())
+            .call();
+        return listFilesInRepo().stream()
+            .map(Path::toString)
+            .collect(Collectors.toSet());
+    }
+
+    public Set<String> getCommitsContainingFile(String file) throws GitAPIException, IOException {
+        final var log = git.log();
+
+        if (!file.isBlank()) {
+            //  Adding a path to a log-command will only log commits that relate to the given path.
+            log.addPath(file);
+        }
+
+        final var reversed = stream(log.call()
+            .spliterator(), false
+        )
+            // Commits by authors (like bots) shouldn't be part of counted
+            //            .filter(not(commit -> pmaProperties.blockedAuthors()
+            //                .contains(commit.getAuthorIdent()
+            //                    .getEmailAddress())))
+            .map(RevCommit::getFirstMessageLine)
+            .toList()
+            .reversed();
+        return Set.copyOf(reversed);
+    }
+
+    private Set<Path> listFilesInRepo() throws IOException {
+        try (Stream<Path> stream = Files.walk(git.getRepository()
+            .getWorkTree()
+            .toPath())) {
+            return stream.filter(Files::isRegularFile)
+                .filter(not((path -> path.toString()
+                    .contains(".git"))))
+                .map(path -> git.getRepository()
+                    .getWorkTree()
+                    .toPath()
+                    .relativize(path))
+                .collect(Collectors.toSet());
+        }
     }
 }

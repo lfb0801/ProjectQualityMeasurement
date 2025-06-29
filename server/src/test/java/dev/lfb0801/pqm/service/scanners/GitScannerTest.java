@@ -18,13 +18,14 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import dev.lfb0801.pqm.config.PMAProperties;
 import dev.lfb0801.pqm.service.GitFSEnvironment;
 
 class GitScannerTest extends GitFSEnvironment {
 
-    private final GitScanner gitScanner = new GitScanner(local, new PMAProperties(tempRepoPath.toString(), List.of()));
+    @Autowired
+    private GitScanner gitScanner;
 
     @Test
     @DisplayName("If the second commit removes 1 of the files, then only the remaining file will be returned")
@@ -41,13 +42,13 @@ class GitScannerTest extends GitFSEnvironment {
             }), suppress().runnable(() -> {
                 appendToFile(remainingFile, "Salve Mundi!");
             }), suppress().runnable(() -> {
-                new File(local.getRepository()
+                new File(git.getRepository()
                     .getWorkTree(), deletedFile
                 ).delete();
             })
         ));
 
-        var everyCommittedFile = gitScanner.getFilesInRepository(local.getRepository()
+        var everyCommittedFile = gitScanner.getFilesInRepository(git.getRepository()
             .resolve(Constants.HEAD));
         var commitCountPerFile = Stream.of(remainingFile, deletedFile)
             .map(suppress().function(file -> Map.entry(file, gitScanner.getCommitsContainingFile(file))))
@@ -63,7 +64,7 @@ class GitScannerTest extends GitFSEnvironment {
     }
 
     @Test
-    @DisplayName("Let's test if my implementation breaks when there are a lot of commits")
+    @DisplayName("Let's test if my implementation breaks when we create a lot of commits")
     void loadTest() throws IOException, GitAPIException {
 
         final String file = "new.txt";
@@ -77,7 +78,7 @@ class GitScannerTest extends GitFSEnvironment {
                 }))
         ).toList());
 
-        var everyCommittedFile = gitScanner.getFilesInRepository(local.getRepository()
+        var everyCommittedFile = gitScanner.getFilesInRepository(git.getRepository()
             .resolve(Constants.HEAD));
         var commitCountPerFile = Stream.of(file)
             .map(suppress().function(f -> Map.entry(f, gitScanner.getCommitsContainingFile(f))))

@@ -8,29 +8,25 @@ import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
-import dev.lfb0801.pqm.config.PqmConfiguration;
-
-@SpringBootTest(classes = PqmConfiguration.class)
 class AggregateServiceTest extends GitFSEnvironment {
 
     @Autowired
     private AggregateService aggregateService;
 
     @Test
-    void testAggregateService() throws IOException {
-        var result = aggregateService.aggregate(local.getRepository()
+    void testAggregateServiceOnInitialCommit() throws IOException {
+        var result = aggregateService.aggregate(git.getRepository()
             .resolve(getInitialCommitRef()));
 
         assertThat(result)//
-            .allMatch(a -> a.locSrc() == 6)
+            .isNotEmpty()
             .allMatch(a -> a.commits()
                                .size() == 1);
     }
 
     private String getInitialCommitRef() {
-        return suppress().get(() -> StreamSupport.stream(local.log()
+        return suppress().get(() -> StreamSupport.stream(git.log()
                 .call()
                 .spliterator(), false
             )

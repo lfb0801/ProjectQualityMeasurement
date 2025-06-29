@@ -1,0 +1,4 @@
+== Implementatie van mijn test-strategie
+
+
+image::../../images/abstractBaseTestClass.png[]
